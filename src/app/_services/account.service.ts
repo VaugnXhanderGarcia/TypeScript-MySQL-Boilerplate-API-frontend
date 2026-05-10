@@ -39,17 +39,16 @@ export class AccountService {
   }
 
   logout() {
-    this.http.post<any>(
-      `${baseUrl}/revoke-token`,
-      {},
-      { withCredentials: true }
-    ).subscribe();
+  this.http.post<any>(`${environment.apiUrl}/accounts/revoke-token`, {}, { withCredentials: true })
+    .subscribe({
+      next: () => this.stopRefreshTokenTimer(),
+      error: () => this.stopRefreshTokenTimer()
+    });
 
-    this.stopRefreshTokenTimer();
-    this.accountSubject.next(null);
-    this.router.navigate(['/account/login']);
-  }
-
+  localStorage.removeItem('account');
+  this.accountSubject.next(null);
+  this.router.navigate(['/account/login']);
+}
   refreshToken() {
     return this.http.post<Account>(
       `${baseUrl}/refresh-token`,

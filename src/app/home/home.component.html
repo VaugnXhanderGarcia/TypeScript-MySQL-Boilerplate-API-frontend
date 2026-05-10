@@ -1,6 +1,27 @@
-<div class="p-4">
-  <div class="container">
-    <h1>Hi!</h1>
-    <p>You are logged in to the Angular Auth System.</p>
+<h1>Overview</h1>
+
+<div class="card mt-3">
+  <div class="card-header">
+    <h4>Dashboard Overview</h4>
+  </div>
+
+  <div class="card-body">
+    <p>You are logged in successfully.</p>
+
+    <p>
+      This is the main overview page of the system. Use the navigation bar above
+      to access your profile or manage accounts.
+    </p>
+
+    <div *ngIf="account?.role === 'Admin'">
+      <p>
+        You are logged in as an administrator. You can manage users through the
+        Accounts section.
+      </p>
+
+      <a routerLink="/admin/accounts" class="btn btn-primary">
+        Go to Accounts
+      </a>
+    </div>
   </div>
 </div>

@@ -1,26 +1,50 @@
-<nav *ngIf="account" class="navbar navbar-expand navbar-dark bg-dark px-3">
-  <a class="navbar-brand" routerLink="/">UC Auth</a>
+<!-- main app container -->
+<div class="app-container" [ngClass]="{ 'bg-light': account }">
 
-  <div class="navbar-nav">
-    <a class="nav-item nav-link" routerLink="/">Home</a>
+  <!-- navbar -->
+  <nav class="navbar navbar-expand navbar-dark bg-dark" *ngIf="account">
+    <div class="navbar-nav">
 
-    <a class="nav-item nav-link" routerLink="/profile">Profile</a>
+      <a
+        class="nav-item nav-link"
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        Home
+      </a>
 
-    <button
-      type="button"
-      class="btn btn-link nav-item nav-link"
-      (click)="openAccounts()">
-      Accounts
-    </button>
+      <a
+        class="nav-item nav-link"
+        routerLink="/profile"
+        routerLinkActive="active">
+        Profile
+      </a>
 
-    <button
-      type="button"
-      class="btn btn-link nav-item nav-link"
-      (click)="logout()">
-      Logout
-    </button>
+      <!-- Account management for Admin only -->
+      <a
+        class="nav-item nav-link"
+        routerLink="/admin/accounts"
+        routerLinkActive="active"
+        *ngIf="isAdmin">
+        Accounts
+      </a>
+
+      <a
+        class="nav-item nav-link"
+        style="cursor: pointer;"
+        (click)="logout()">
+        Logout
+      </a>
+
+    </div>
+  </nav>
+
+  <!-- alert messages -->
+  <alert></alert>
+
+  <!-- routed pages appear here -->
+  <div class="container pt-4 pb-4">
+    <router-outlet></router-outlet>
   </div>
-</nav>
 
-<alert></alert>
-<router-outlet></router-outlet>
+</div>

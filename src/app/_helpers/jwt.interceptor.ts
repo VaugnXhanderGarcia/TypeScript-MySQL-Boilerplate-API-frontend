@@ -1,4 +1,4 @@
-    import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   HttpRequest,
   HttpHandler,
@@ -23,7 +23,8 @@ export class JwtInterceptor implements HttpInterceptor {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${account.jwtToken}`
-        }
+        },
+        withCredentials: true
       });
     }
 

@@ -1,6 +1,3 @@
-
-import { environment } from '../environments/environment';
-import { fakeBackendProvider } from './_helpers/fake-backend.interceptor';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import {
@@ -33,9 +30,22 @@ import { AlertComponent } from './_components/alert.component';
     AppRoutingModule
   ],
   providers: [
-  { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-  { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-  ...(environment.useFakeBackend ? [fakeBackendProvider] : [])
+  {
+    provide: APP_INITIALIZER,
+    useFactory: appInitializer,
+    multi: true,
+    deps: [AccountService]
+  },
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: JwtInterceptor,
+    multi: true
+  },
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: ErrorInterceptor,
+    multi: true
+  }
 ],
   bootstrap: [App]
 })

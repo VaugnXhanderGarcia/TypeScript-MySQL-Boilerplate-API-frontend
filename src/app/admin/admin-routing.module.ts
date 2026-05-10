@@ -3,17 +3,30 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { LayoutComponent } from './layout.component';
 import { OverviewComponent } from './overview.component';
-
-const accountsModule = () =>
-  import('./accounts/accounts.module').then(x => x.AccountsModule);
+import { ListComponent } from './accounts/list.component';
+import { AddEditComponent } from './accounts/add-edit.component';
 
 const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
     children: [
-      { path: '', component: OverviewComponent },
-      { path: 'accounts', loadChildren: accountsModule }
+      {
+        path: '',
+        component: OverviewComponent
+      },
+      {
+        path: 'accounts',
+        component: ListComponent
+      },
+      {
+        path: 'accounts/add',
+        component: AddEditComponent
+      },
+      {
+        path: 'accounts/edit/:id',
+        component: AddEditComponent
+      }
     ]
   }
 ];
