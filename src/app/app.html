@@ -1,0 +1,26 @@
+<nav *ngIf="account" class="navbar navbar-expand navbar-dark bg-dark px-3">
+  <a class="navbar-brand" routerLink="/">UC Auth</a>
+
+  <div class="navbar-nav">
+    <a class="nav-item nav-link" routerLink="/">Home</a>
+
+    <a class="nav-item nav-link" routerLink="/profile">Profile</a>
+
+    <button
+      type="button"
+      class="btn btn-link nav-item nav-link"
+      (click)="openAccounts()">
+      Accounts
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-link nav-item nav-link"
+      (click)="logout()">
+      Logout
+    </button>
+  </div>
+</nav>
+
+<alert></alert>
+<router-outlet></router-outlet>

@@ -1,0 +1,9 @@
+<h4>Verify Email</h4>
+
+<div *ngIf="emailStatus === EmailStatus.Verifying">
+  Verifying...
+</div>
+
+<div *ngIf="emailStatus === EmailStatus.Failed">
+  Verification failed. While email is disabled, manually verify the account in MySQL.
+</div>

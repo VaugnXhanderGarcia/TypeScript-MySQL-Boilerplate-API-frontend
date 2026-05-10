@@ -1,0 +1,17 @@
+<div class="card">
+  <div class="card-header">
+    <h4 class="mb-0">Account Details</h4>
+  </div>
+
+  <div class="card-body" *ngIf="account as acc">
+    <p><strong>Title:</strong> {{ acc.title }}</p>
+    <p><strong>First Name:</strong> {{ acc.firstName }}</p>
+    <p><strong>Last Name:</strong> {{ acc.lastName }}</p>
+    <p><strong>Email:</strong> {{ acc.email }}</p>
+    <p><strong>Role:</strong> {{ acc.role }}</p>
+
+    <a routerLink="../update" class="btn btn-primary">
+      Update Profile
+    </a>
+  </div>
+</div>
