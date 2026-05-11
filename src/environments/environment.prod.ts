@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://your-deployed-backend-url.com',
+  apiUrl: 'https://angular-auth-final.onrender.com',
   useFakeBackend: false
 };

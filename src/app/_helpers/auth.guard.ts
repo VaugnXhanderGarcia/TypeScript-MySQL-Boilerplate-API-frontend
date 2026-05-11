@@ -27,7 +27,7 @@ export class AuthGuard {
 
     const roles = route.data['roles'] as string[] | undefined;
 
-    if (roles && roles.length && !roles.includes(account.role)) {
+    if (roles && roles.length && (!account.role || !roles.includes(account.role))) {
       this.alertService.error('Admin access only.');
       this.router.navigate(['/']);
       return false;

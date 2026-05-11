@@ -44,14 +44,11 @@
               </a>
 
               <button
-                *ngIf="currentAccount?.id != account.id"
-                class="btn btn-sm btn-danger"
-                [disabled]="account.isDeleting"
-                (click)="deleteAccount(account.id)">
-
-                <span *ngIf="account.isDeleting" class="spinner-border spinner-border-sm"></span>
-                <span *ngIf="!account.isDeleting">Delete</span>
-              </button>
+  class="btn btn-sm btn-danger"
+  [disabled]="!account.id"
+  (click)="account.id && deleteAccount(account.id)">
+  Delete
+</button>
 
               <span
                 *ngIf="currentAccount?.id == account.id"
