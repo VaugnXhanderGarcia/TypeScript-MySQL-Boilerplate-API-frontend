@@ -6,7 +6,6 @@ import { map } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { Account } from '../_models';
-import { AlertService } from './alert.service';
 
 const baseUrl = `${environment.apiUrl}/accounts`;
 
@@ -17,50 +16,58 @@ export class AccountService {
   private refreshTokenTimeout?: any;
 
   constructor(
-  private router: Router,
-  private http: HttpClient
-) {
-  this.accountSubject = new BehaviorSubject<Account | null>(null);
-  this.account = this.accountSubject.asObservable();
-}
+    private router: Router,
+    private http: HttpClient
+  ) {
+    this.accountSubject = new BehaviorSubject<Account | null>(null);
+    this.account = this.accountSubject.asObservable();
+  }
 
   public get accountValue(): Account | null {
-  return this.accountSubject.value;
-}
+    return this.accountSubject.value;
+  }
 
- login(email: string, password: string) {
-  return this.http.post<Account>(`${environment.apiUrl}/accounts/authenticate`, { email, password }, { withCredentials: true })
-    .pipe(map(account => {
-      this.accountSubject.next(account);
-      this.startRefreshTokenTimer();
-      return account;
-    }));
-}
+  login(email: string, password: string) {
+    return this.http.post<Account>(
+      `${baseUrl}/authenticate`,
+      { email, password },
+      { withCredentials: true }
+    ).pipe(
+      map(account => {
+        this.accountSubject.next(account);
+        this.startRefreshTokenTimer();
+        return account;
+      })
+    );
+  }
 
   logout() {
-  this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true })
-    .subscribe({
+    this.http.post<any>(
+      `${baseUrl}/revoke-token`,
+      {},
+      { withCredentials: true }
+    ).subscribe({
       next: () => {},
       error: () => {}
     });
 
-  this.stopRefreshTokenTimer();
-  localStorage.removeItem('account');
-  this.accountSubject.next(null);
-  this.router.navigate(['/account/login']);
-}
+    this.stopRefreshTokenTimer();
+    this.accountSubject.next(null);
+    this.router.navigate(['/account/login']);
+  }
 
   refreshToken() {
-    return this.http
-      .post<Account>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
-      .pipe(
-        map(account => {
-          localStorage.setItem('account', JSON.stringify(account));
-          this.accountSubject.next(account);
-          this.startRefreshTokenTimer();
-          return account;
-        })
-      );
+    return this.http.post<Account>(
+      `${baseUrl}/refresh-token`,
+      {},
+      { withCredentials: true }
+    ).pipe(
+      map(account => {
+        this.accountSubject.next(account);
+        this.startRefreshTokenTimer();
+        return account;
+      })
+    );
   }
 
   register(account: any) {
@@ -87,30 +94,37 @@ export class AccountService {
     });
   }
 
- getAll() {
-  return this.http.get<any>(`${baseUrl}`, {
-    headers: {
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache'
-    }
-  });
-}
+  getAll() {
+    return this.http.get<Account[]>(baseUrl, {
+      withCredentials: true,
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache'
+      }
+    });
+  }
+
   getById(id: string) {
-    return this.http.get<Account>(`${baseUrl}/${id}`);
+    return this.http.get<Account>(`${baseUrl}/${id}`, {
+      withCredentials: true
+    });
   }
 
   create(params: any) {
-    return this.http.post(baseUrl, params);
+    return this.http.post(baseUrl, params, {
+      withCredentials: true
+    });
   }
 
   update(id: string, params: any) {
-    return this.http.put<Account>(`${baseUrl}/${id}`, params).pipe(
+    return this.http.put<Account>(`${baseUrl}/${id}`, params, {
+      withCredentials: true
+    }).pipe(
       map(account => {
         const currentAccount = this.accountValue;
 
         if (account.id === currentAccount?.id) {
           account = { ...currentAccount, ...account };
-          localStorage.setItem('account', JSON.stringify(account));
           this.accountSubject.next(account);
         }
 
@@ -120,7 +134,9 @@ export class AccountService {
   }
 
   delete(id: string) {
-    return this.http.delete(`${baseUrl}/${id}`).pipe(
+    return this.http.delete(`${baseUrl}/${id}`, {
+      withCredentials: true
+    }).pipe(
       map(x => {
         const currentAccount = this.accountValue;
 

@@ -2,8 +2,11 @@ import { catchError, of } from 'rxjs';
 import { AccountService } from '../_services';
 
 export function appInitializer(accountService: AccountService) {
-  return () => accountService.refreshToken()
-    .pipe(
-      catchError(() => of(null))
-    );
+  return () =>
+    new Promise<void>((resolve) => {
+      accountService.refreshToken().subscribe({
+        next: () => resolve(),
+        error: () => resolve()
+      });
+    });
 }
