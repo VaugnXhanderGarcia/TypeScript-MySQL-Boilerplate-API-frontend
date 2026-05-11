@@ -5,61 +5,126 @@ import { AccountService, AlertService } from '../../_services';
 import { Account } from '../../_models';
 
 @Component({
-  standalone: false,
-  templateUrl: './list.component.html'
+  templateUrl: './list.component.html',
+  standalone: false
 })
 export class ListComponent implements OnInit {
-  accounts?: Account[];
-  loading = false;
+  accounts: Account[] = [];
+  currentAccount?: Account | null;
+  errorMessage = '';
 
   constructor(
     private accountService: AccountService,
     private alertService: AlertService
-  ) {}
+  ) {
+    this.currentAccount = this.accountService.accountValue;
+  }
 
   ngOnInit() {
-    this.loading = true;
+    this.loadAccounts();
+  }
+
+  loadAccounts() {
+    this.errorMessage = '';
 
     this.accountService.getAll()
       .pipe(first())
       .subscribe({
-        next: accounts => {
-          this.accounts = accounts;
-          this.loading = false;
+        next: (response: any) => {
+          console.log('RAW ACCOUNTS RESPONSE:', response);
+          console.log('RESPONSE TYPE:', typeof response);
+          console.log('IS ARRAY:', Array.isArray(response));
+
+          let result: any[] = [];
+
+          if (Array.isArray(response)) {
+            result = response;
+          }
+
+          else if (typeof response === 'string') {
+            try {
+              const parsed = JSON.parse(response);
+
+              if (Array.isArray(parsed)) {
+                result = parsed;
+              } else {
+                result = this.extractArrayFromObject(parsed);
+              }
+            } catch (error) {
+              console.error('Failed to parse response string:', error);
+            }
+          }
+
+          else if (response && typeof response === 'object') {
+            result = this.extractArrayFromObject(response);
+          }
+
+          this.accounts = result;
+
+          console.log('FINAL ACCOUNTS ARRAY:', this.accounts);
+          console.log('FINAL ACCOUNTS LENGTH:', this.accounts.length);
         },
-        error: error => {
-          this.alertService.error(error);
-          this.loading = false;
+        error: (error) => {
+          console.error('ACCOUNTS ERROR:', error);
+          this.errorMessage = 'Unable to load accounts. Please make sure you are logged in as Admin.';
         }
       });
   }
 
-  deleteAccount(id: string) {
-    const confirmed = confirm('Are you sure you want to delete this account?');
+  extractArrayFromObject(response: any): any[] {
+    if (Array.isArray(response.accounts)) {
+      return response.accounts;
+    }
 
-    if (!confirmed) {
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    if (Array.isArray(response.items)) {
+      return response.items;
+    }
+
+    if (Array.isArray(response.rows)) {
+      return response.rows;
+    }
+
+    if (Array.isArray(response.result)) {
+      return response.result;
+    }
+
+    const firstArrayValue = Object.values(response).find(value => Array.isArray(value));
+
+    if (Array.isArray(firstArrayValue)) {
+      return firstArrayValue;
+    }
+
+    return [];
+  }
+
+  deleteAccount(id: string) {
+    if (String(this.currentAccount?.id) === String(id)) {
+      this.alertService.error('You cannot delete your own account.');
       return;
     }
 
-    const account = this.accounts?.find(x => x.id === id);
+    const account = this.accounts.find(x => String(x.id) === String(id));
 
-    if (account) {
-      account.isDeleting = true;
+    if (!account) {
+      return;
     }
+
+    account.isDeleting = true;
 
     this.accountService.delete(id)
       .pipe(first())
       .subscribe({
         next: () => {
-          this.accounts = this.accounts?.filter(x => x.id !== id);
+          this.accounts = this.accounts.filter(x => String(x.id) !== String(id));
           this.alertService.success('Account deleted successfully.');
         },
-        error: error => {
+        error: (error) => {
+          account.isDeleting = false;
           this.alertService.error(error);
-
-          if (account) {
-            account.isDeleting = false;
-          }
         }
       });
   }

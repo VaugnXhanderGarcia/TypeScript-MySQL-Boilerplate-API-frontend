@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { AccountService } from './_services';
+import { AccountService, AlertService } from './_services';
 import { Account } from './_models';
 
 @Component({
@@ -11,12 +12,21 @@ import { Account } from './_models';
 export class App {
   account?: Account | null;
 
-  constructor(private accountService: AccountService) {
+  constructor(
+    private accountService: AccountService,
+    private alertService: AlertService,
+    private router: Router
+  ) {
     this.accountService.account.subscribe(x => this.account = x);
   }
 
-  get isAdmin(): boolean {
-    return this.account?.role === 'Admin';
+  openAccounts() {
+    if (this.account?.role === 'Admin') {
+      this.router.navigate(['/admin/accounts']);
+      return;
+    }
+
+    this.alertService.error('Admin access only.');
   }
 
   logout() {

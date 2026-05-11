@@ -5,8 +5,8 @@ import { AuthGuard } from './_helpers';
 import { HomeComponent } from './home';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
-const adminModule = () => import('./admin/admin.module').then(x => x.AdminModule);
 const profileModule = () => import('./profile/profile.module').then(x => x.ProfileModule);
+const adminModule = () => import('./admin/admin.module').then(x => x.AdminModule);
 
 const routes: Routes = [
   {

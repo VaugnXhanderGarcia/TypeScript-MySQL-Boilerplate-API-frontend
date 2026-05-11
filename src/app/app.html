@@ -1,7 +1,5 @@
-<!-- main app container -->
 <div class="app-container" [ngClass]="{ 'bg-light': account }">
 
-  <!-- navbar -->
   <nav class="navbar navbar-expand navbar-dark bg-dark" *ngIf="account">
     <div class="navbar-nav">
 
@@ -20,12 +18,10 @@
         Profile
       </a>
 
-      <!-- Account management for Admin only -->
       <a
         class="nav-item nav-link"
-        routerLink="/admin/accounts"
-        routerLinkActive="active"
-        *ngIf="isAdmin">
+        style="cursor: pointer;"
+        (click)="openAccounts()">
         Accounts
       </a>
 
@@ -39,10 +35,8 @@
     </div>
   </nav>
 
-  <!-- alert messages -->
   <alert></alert>
 
-  <!-- routed pages appear here -->
   <div class="container pt-4 pb-4">
     <router-outlet></router-outlet>
   </div>

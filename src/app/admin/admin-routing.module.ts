@@ -2,9 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { LayoutComponent } from './layout.component';
-import { OverviewComponent } from './overview.component';
-import { ListComponent } from './accounts/list.component';
-import { AddEditComponent } from './accounts/add-edit.component';
+
+const accountsModule = () => import('./accounts/accounts.module').then(x => x.AccountsModule);
 
 const routes: Routes = [
   {
@@ -13,19 +12,12 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: OverviewComponent
+        redirectTo: 'accounts',
+        pathMatch: 'full'
       },
       {
         path: 'accounts',
-        component: ListComponent
-      },
-      {
-        path: 'accounts/add',
-        component: AddEditComponent
-      },
-      {
-        path: 'accounts/edit/:id',
-        component: AddEditComponent
+        loadChildren: accountsModule
       }
     ]
   }

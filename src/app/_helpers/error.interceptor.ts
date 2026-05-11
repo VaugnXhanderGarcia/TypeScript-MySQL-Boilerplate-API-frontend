@@ -20,12 +20,19 @@ export class ErrorInterceptor implements HttpInterceptor {
       catchError((err: HttpErrorResponse) => {
         const error = err.error?.message || err.statusText || 'Something went wrong';
 
-        if (err.status === 403) {
-          this.alertService.error('Admin access only.');
+        const isRefreshTokenRequest = request.url.includes('/accounts/refresh-token');
+        const isRevokeTokenRequest = request.url.includes('/accounts/revoke-token');
+
+        if (isRefreshTokenRequest || isRevokeTokenRequest) {
+          return throwError(() => error);
         }
 
         if (err.status === 401) {
           this.alertService.error('Unauthorized. Please login again.');
+        } else if (err.status === 403) {
+          this.alertService.error('Admin access only.');
+        } else {
+          this.alertService.error(error);
         }
 
         return throwError(() => error);

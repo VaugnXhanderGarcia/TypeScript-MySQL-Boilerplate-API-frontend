@@ -4,37 +4,33 @@ import { first } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 import { Account } from '../_models';
-import { MustMatch } from '../_helpers';
 
 @Component({
-  standalone: false,
-  templateUrl: './update.component.html'
+  templateUrl: './update.component.html',
+  standalone: false
 })
 export class UpdateComponent implements OnInit {
+  account?: Account | null;
   form!: FormGroup;
-  account: Account | null = null;
   loading = false;
   submitted = false;
-  deleting = false;
 
   constructor(
     private formBuilder: FormBuilder,
     private accountService: AccountService,
     private alertService: AlertService
-  ) {}
+  ) {
+    this.account = this.accountService.accountValue;
+  }
 
   ngOnInit() {
-    this.account = this.accountService.accountValue;
-
     this.form = this.formBuilder.group({
       title: [this.account?.title, Validators.required],
       firstName: [this.account?.firstName, Validators.required],
       lastName: [this.account?.lastName, Validators.required],
       email: [this.account?.email, [Validators.required, Validators.email]],
-      password: ['', [Validators.minLength(6)]],
+      password: [''],
       confirmPassword: ['']
-    }, {
-      validators: MustMatch('password', 'confirmPassword')
     });
   }
 
@@ -50,16 +46,14 @@ export class UpdateComponent implements OnInit {
       return;
     }
 
-    this.loading = true;
-
-    const params = this.form.value;
-
-    if (!params.password) {
-      delete params.password;
-      delete params.confirmPassword;
+    if (this.f['password'].value && this.f['password'].value !== this.f['confirmPassword'].value) {
+      this.alertService.error('Password and confirm password do not match.');
+      return;
     }
 
-    this.accountService.update(this.account.id, params)
+    this.loading = true;
+
+    this.accountService.update(String(this.account.id), this.form.value)
       .pipe(first())
       .subscribe({
         next: () => {
@@ -69,30 +63,6 @@ export class UpdateComponent implements OnInit {
         error: error => {
           this.alertService.error(error);
           this.loading = false;
-        }
-      });
-  }
-
-  onDelete() {
-    if (!this.account) return;
-
-    const confirmed = confirm('Are you sure you want to delete your account?');
-
-    if (!confirmed) {
-      return;
-    }
-
-    this.deleting = true;
-
-    this.accountService.delete(this.account.id)
-      .pipe(first())
-      .subscribe({
-        next: () => {
-          this.alertService.success('Account deleted successfully.');
-        },
-        error: error => {
-          this.alertService.error(error);
-          this.deleting = false;
         }
       });
   }
