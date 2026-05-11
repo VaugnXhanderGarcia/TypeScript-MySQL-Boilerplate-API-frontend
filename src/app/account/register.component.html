@@ -85,8 +85,8 @@
         [ngClass]="{ 'is-invalid': submitted && f['confirmPassword'].errors }">
 
       <div *ngIf="submitted && f['confirmPassword'].errors" class="invalid-feedback">
-        <div *ngIf="f['confirmPassword'].errors?.['required']">Confirm Password is required</div>
-        <div *ngIf="f['confirmPassword'].errors?.['mustMatch']">Passwords must match</div>
+        <div *ngIf="f['confirmPassword'].errors['required']">Confirm Password is required</div>
+        <div *ngIf="    ">Passwords must match</div>
       </div>
     </div>
   </div>
