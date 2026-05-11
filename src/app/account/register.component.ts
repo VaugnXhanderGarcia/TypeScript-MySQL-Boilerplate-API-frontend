@@ -51,19 +51,19 @@ export class RegisterComponent implements OnInit {
     this.loading = true;
 
     this.accountService.register(this.form.value)
-      .pipe(first())
-      .subscribe({
-        next: () => {
-          this.alertService.success(
-            'Registration successful. Since email is disabled for testing, manually verify the account in MySQL.',
-            { keepAfterRouteChange: true }
-          );
-          this.router.navigate(['../login']);
-        },
-        error: error => {
-          this.alertService.error(error);
-          this.loading = false;
-        }
-      });
+  .subscribe({
+    next: () => {
+      this.alertService.success(
+        'Registration successful, please check your email for verification instructions',
+        { keepAfterRouteChange: true }
+      );
+
+      this.router.navigate(['/account/login']);
+    },
+    error: error => {
+      this.alertService.error(error);
+      this.loading = false;
+    }
+  });
   }
 }
