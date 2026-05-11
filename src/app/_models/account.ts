@@ -5,11 +5,7 @@ export class Account {
   lastName!: string;
   email!: string;
   role!: string;
-  jwtToken!: string;
+  jwtToken?: string;
   isVerified?: boolean;
-  created?: string;
-  updated?: string;
-
-  // used only in the frontend accounts table
-  isDeleting?: boolean;
+  acceptTerms?: boolean | number;
 }

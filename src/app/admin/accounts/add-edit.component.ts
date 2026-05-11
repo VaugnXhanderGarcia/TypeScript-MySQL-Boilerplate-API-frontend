@@ -36,28 +36,31 @@ export class AddEditComponent implements OnInit {
       : [Validators.minLength(6)];
 
     this.form = this.formBuilder.group({
-      title: ['', Validators.required],
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      role: [Role.User, Validators.required],
-      password: ['', passwordValidators],
-      confirmPassword: ['']
-    }, {
-      validators: MustMatch('password', 'confirmPassword')
-    });
+  title: ['', Validators.required],
+  firstName: ['', Validators.required],
+  lastName: ['', Validators.required],
+  email: ['', [Validators.required, Validators.email]],
+  role: ['User', Validators.required],
+  password: ['', [Validators.minLength(6), ...(this.isAddMode ? [Validators.required] : [])]],
+  confirmPassword: [''],
+  acceptTerms: [false, Validators.requiredTrue]
+}, {
+  validators: MustMatch('password', 'confirmPassword')
+});
 
     if (!this.isAddMode && this.id) {
       this.accountService.getById(this.id)
-        .pipe(first())
-        .subscribe({
-          next: account => {
-            this.form.patchValue(account);
-          },
-          error: error => {
-            this.alertService.error(error);
-          }
-        });
+  .pipe(first())
+  .subscribe(x => {
+    this.form.patchValue({
+      title: x.title,
+      firstName: x.firstName,
+      lastName: x.lastName,
+      email: x.email,
+      role: x.role,
+      acceptTerms: !!x.acceptTerms
+    });
+  });
     }
   }
 

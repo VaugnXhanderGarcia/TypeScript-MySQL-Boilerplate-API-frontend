@@ -83,7 +83,9 @@
       <div class="mb-3">
         <label class="form-label">
           Password
-          <em *ngIf="!isAddMode" class="text-muted">(Leave blank to keep the same password)</em>
+          <em *ngIf="!isAddMode" class="text-muted">
+            (Leave blank to keep the same password)
+          </em>
         </label>
 
         <input
@@ -94,7 +96,9 @@
 
         <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
           <div *ngIf="f['password'].errors['required']">Password is required</div>
-          <div *ngIf="f['password'].errors['minlength']">Password must be at least 6 characters</div>
+          <div *ngIf="f['password'].errors['minlength']">
+            Password must be at least 6 characters
+          </div>
         </div>
       </div>
 
@@ -107,7 +111,27 @@
           [ngClass]="{ 'is-invalid': submitted && f['confirmPassword'].errors }" />
 
         <div *ngIf="submitted && f['confirmPassword'].errors" class="invalid-feedback">
-          <div *ngIf="f['confirmPassword'].errors['mustMatch']">Passwords must match</div>
+          <div *ngIf="f['confirmPassword'].errors['mustMatch']">
+            Passwords must match
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD THIS PART HERE -->
+      <div class="mb-3 form-check">
+        <input
+          type="checkbox"
+          formControlName="acceptTerms"
+          id="acceptTerms"
+          class="form-check-input"
+          [ngClass]="{ 'is-invalid': submitted && f['acceptTerms'].errors }" />
+
+        <label for="acceptTerms" class="form-check-label">
+          Accept Terms and Conditions
+        </label>
+
+        <div *ngIf="submitted && f['acceptTerms'].errors" class="invalid-feedback">
+          Accept Terms and Conditions is required
         </div>
       </div>
 
