@@ -42,19 +42,22 @@ export class AccountService {
   }
 
   logout() {
-    this.http.post<any>(
-      `${baseUrl}/revoke-token`,
-      {},
-      { withCredentials: true }
-    ).subscribe({
-      next: () => {},
-      error: () => {}
+  this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true })
+    .subscribe({
+      next: () => {
+        this.stopRefreshTokenTimer();
+        localStorage.removeItem('account');
+        this.accountSubject.next(null);
+        this.router.navigate(['/account/login']);
+      },
+      error: () => {
+        this.stopRefreshTokenTimer();
+        localStorage.removeItem('account');
+        this.accountSubject.next(null);
+        this.router.navigate(['/account/login']);
+      }
     });
-
-    this.stopRefreshTokenTimer();
-    this.accountSubject.next(null);
-    this.router.navigate(['/account/login']);
-  }
+}
 
   refreshToken() {
   return this.http.post<any>(
