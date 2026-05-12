@@ -41,30 +41,30 @@
   );
 }
 
-    logout() {
-  this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true })
-    .subscribe({
-      next: () => {},
-      error: () => {}
-    });
+   logout() {
+    this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true })
+        .subscribe({
+            next: () => {},
+            error: () => {}
+        });
 
-  this.stopRefreshTokenTimer();
-  this.accountSubject.next(null);
-  this.router.navigate(['/account/login']);
+    this.stopRefreshTokenTimer();
+    this.accountSubject.next(null);
+    this.router.navigate(['/account/login']);
 }
 
     refreshToken() {
-  return this.http.post<Account>(
-    `${baseUrl}/refresh-token`,
-    {},
-    { withCredentials: true }
-  ).pipe(
-    map(account => {
-      this.accountSubject.next(account);
-      this.startRefreshTokenTimer();
-      return account;
-    })
-  );
+    return this.http.post<Account>(
+        `${baseUrl}/refresh-token`,
+        {},
+        { withCredentials: true }
+    ).pipe(
+        map(account => {
+            this.accountSubject.next(account);
+            this.startRefreshTokenTimer();
+            return account;
+        })
+    );
 }
 
     register(account: any) {

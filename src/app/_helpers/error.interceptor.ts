@@ -17,7 +17,7 @@ export class ErrorInterceptor implements HttpInterceptor {
       catchError((err: HttpErrorResponse) => {
         const isRefreshTokenRequest = request.url.includes('/refresh-token');
 
-        if (err.status === 401) {
+        if (err.status === 401 && !isRefreshTokenRequest) {
           if (!isRefreshTokenRequest) {
             this.accountService.logout();
             this.alertService.error('Unauthorized. Please login again.');
