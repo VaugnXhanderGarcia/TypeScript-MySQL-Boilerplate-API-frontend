@@ -1,32 +1,25 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 
-import { AccountService, AlertService } from './_services';
 import { Account } from './_models';
+import { AccountService } from './_services';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.html',
-  standalone: false
+  standalone: false,
+  templateUrl: './app.component.html'
 })
 export class App {
   account?: Account | null;
 
-  constructor(
-    private accountService: AccountService,
-    private alertService: AlertService,
-    private router: Router
-  ) {
-    this.accountService.account.subscribe(x => this.account = x);
-  }
+  constructor(private accountService: AccountService) {
+    this.accountService.account.subscribe(x => {
+      this.account = x;
+    });
 
-  openAccounts() {
-    if (this.account?.role === 'Admin') {
-      this.router.navigate(['/admin/accounts']);
-      return;
-    }
-
-    this.alertService.error('Admin access only.');
+    this.accountService.refreshToken().subscribe({
+      next: () => {},
+      error: () => {}
+    });
   }
 
   logout() {

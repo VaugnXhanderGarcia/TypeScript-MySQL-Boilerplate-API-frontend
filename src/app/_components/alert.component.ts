@@ -1,98 +1,81 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  ChangeDetectorRef
-} from '@angular/core';
-import { Router, NavigationStart } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NavigationStart, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { Alert, AlertType } from '../_models';
-import { AlertService } from '../_services';
+import { AlertService } from '../_services/alert.service';
 
 @Component({
-  selector: 'alert',
+  selector: 'app-alert',
   standalone: false,
   templateUrl: './alert.component.html'
 })
 export class AlertComponent implements OnInit, OnDestroy {
-  @Input() id = 'default-alert';
-  @Input() fade = true;
-
-  alerts: Alert[] = [];
+  alerts: any[] = [];
   alertSubscription!: Subscription;
   routeSubscription!: Subscription;
 
   constructor(
     private router: Router,
-    private alertService: AlertService,
-    private cd: ChangeDetectorRef
+    private alertService: AlertService
   ) {}
 
   ngOnInit() {
-    this.alertSubscription = this.alertService.onAlert(this.id)
+    this.alertSubscription = this.alertService.onAlert()
       .subscribe(alert => {
-        if (!alert.message) {
-          this.alerts = this.alerts.filter(x => x.keepAfterRouteChange);
-          this.alerts.forEach(x => delete x.keepAfterRouteChange);
-          this.cd.detectChanges();
+        if (!alert) {
+          this.alerts = [];
           return;
         }
 
         this.alerts.push(alert);
-        this.cd.detectChanges();
-
-        if (alert.autoClose) {
-          setTimeout(() => this.removeAlert(alert), 3000);
-        }
       });
 
     this.routeSubscription = this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
-        this.alertService.clear(this.id);
+        this.alerts = this.alerts.filter(x => x.keepAfterRouteChange);
+
+        this.alerts.forEach(x => {
+          x.keepAfterRouteChange = false;
+        });
       }
     });
   }
 
   ngOnDestroy() {
-    this.alertSubscription.unsubscribe();
-    this.routeSubscription.unsubscribe();
-  }
+    if (this.alertSubscription) {
+      this.alertSubscription.unsubscribe();
+    }
 
-  removeAlert(alert: Alert) {
-    if (!this.alerts.includes(alert)) return;
-
-    if (this.fade) {
-      alert.fade = true;
-      this.cd.detectChanges();
-
-      setTimeout(() => {
-        this.alerts = this.alerts.filter(x => x !== alert);
-        this.cd.detectChanges();
-      }, 250);
-    } else {
-      this.alerts = this.alerts.filter(x => x !== alert);
-      this.cd.detectChanges();
+    if (this.routeSubscription) {
+      this.routeSubscription.unsubscribe();
     }
   }
 
-  cssClasses(alert: Alert) {
+  removeAlert(alert: any) {
+    this.alerts = this.alerts.filter(x => x !== alert);
+  }
+
+  cssClasses(alert: any) {
     if (!alert) return '';
 
-    const classes = ['alert', 'alert-dismissible', 'mt-4', 'container'];
+    const classes = ['alert', 'alert-dismissable', 'mt-4', 'container'];
 
-    const alertTypeClass = {
-      [AlertType.Success]: 'alert-success',
-      [AlertType.Error]: 'alert-danger',
-      [AlertType.Info]: 'alert-info',
-      [AlertType.Warning]: 'alert-warning'
-    };
+    const alertType = alert.type;
 
-    classes.push(alertTypeClass[alert.type]);
+    if (alertType === 'success') {
+      classes.push('alert-success');
+    }
 
-    if (alert.fade) {
-      classes.push('fade');
+    if (alertType === 'error') {
+      classes.push('alert-danger');
+    }
+
+    if (alertType === 'info') {
+      classes.push('alert-info');
+    }
+
+    if (alertType === 'warning') {
+      classes.push('alert-warning');
     }
 
     return classes.join(' ');

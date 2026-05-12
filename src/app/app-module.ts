@@ -1,23 +1,23 @@
-import { environment } from '../environments/environment';
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import {
-  HTTP_INTERCEPTORS,
-  HttpClientModule
-} from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 
-import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
+import { AppRoutingModule } from './app-routing-module';
 
+import { AlertComponent } from './_components/alert.component';
+
+import { AccountService } from './_services';
 import {
   appInitializer,
   JwtInterceptor,
   ErrorInterceptor
 } from './_helpers';
 
-import { AccountService } from './_services';
-import { AlertComponent } from './_components/alert.component';
+export function initializeApp(accountService: AccountService) {
+  return () => appInitializer(accountService);
+}
 
 @NgModule({
   declarations: [
@@ -33,9 +33,9 @@ import { AlertComponent } from './_components/alert.component';
   providers: [
     {
       provide: APP_INITIALIZER,
-      useFactory: appInitializer,
-      multi: true,
-      deps: [AccountService]
+      useFactory: initializeApp,
+      deps: [AccountService],
+      multi: true
     },
     {
       provide: HTTP_INTERCEPTORS,
