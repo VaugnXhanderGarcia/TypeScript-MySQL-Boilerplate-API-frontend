@@ -1,11 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor,
-  HttpErrorResponse
-} from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -20,25 +14,27 @@ export class ErrorInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        const isRefreshTokenRequest = request.url.includes('/accounts/refresh-token');
+      catchError((err: HttpErrorResponse) => {
+        const isRefreshTokenRequest = request.url.includes('/refresh-token');
 
-        if (isRefreshTokenRequest) {
-          return throwError(() => error);
-        }
+        if (err.status === 401) {
+          if (!isRefreshTokenRequest) {
+            this.accountService.logout();
+            this.alertService.error('Unauthorized. Please login again.');
+          }
 
-        if ([401, 403].includes(error.status) && this.accountService.accountValue) {
-          this.accountService.logout();
+          return throwError(() => err);
         }
 
         const message =
-          error.error?.message ||
-          error.statusText ||
+          err.error?.message ||
+          err.error?.title ||
+          err.message ||
           'Something went wrong. Please try again.';
 
         this.alertService.error(message);
 
-        return throwError(() => error);
+        return throwError(() => err);
       })
     );
   }

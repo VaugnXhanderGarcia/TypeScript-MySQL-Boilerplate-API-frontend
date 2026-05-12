@@ -8,6 +8,7 @@ import { Alert, AlertType, AlertOptions } from '../_models';
 export class AlertService {
   private subject = new Subject<Alert>();
   private defaultId = 'default-alert';
+  private activeMessages = new Set<string>();
 
   onAlert(id = this.defaultId): Observable<Alert> {
     return this.subject.asObservable().pipe(
@@ -33,10 +34,25 @@ export class AlertService {
 
   clear(id = this.defaultId) {
     this.subject.next(new Alert({ id }));
+    this.activeMessages.clear();
   }
 
   private alert(alert: Alert) {
     alert.id = alert.id || this.defaultId;
+
+    const key = `${alert.type}-${alert.message}`;
+
+    if (this.activeMessages.has(key)) {
+      return;
+    }
+
+    this.activeMessages.add(key);
+
     this.subject.next(alert);
+
+    setTimeout(() => {
+      this.activeMessages.delete(key);
+      this.clear(alert.id);
+    }, 3500);
   }
 }

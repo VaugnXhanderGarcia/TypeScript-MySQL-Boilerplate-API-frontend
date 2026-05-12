@@ -9,12 +9,11 @@ import { AlertService } from '../_services';
   selector: 'app-alert',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './alert.component.html'
+  templateUrl: './alert.component.html',
+  styleUrls: ['./alert.component.css']
 })
 export class AlertComponent implements OnInit, OnDestroy {
   alerts: Alert[] = [];
-  AlertType = AlertType;
-
   private subscription?: Subscription;
 
   constructor(private alertService: AlertService) {}
@@ -26,28 +25,32 @@ export class AlertComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const duplicate = this.alerts.find(x =>
-        x.message === alert.message &&
-        x.type === alert.type
-      );
-
-      if (duplicate) {
-        return;
-      }
-
-      this.alerts.push(alert);
-
-      if (alert.autoClose !== false) {
-        setTimeout(() => this.removeAlert(alert), 4000);
-      }
+      this.alerts = [alert];
     });
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
 
   removeAlert(alert: Alert) {
     this.alerts = this.alerts.filter(x => x !== alert);
   }
 
-  ngOnDestroy() {
-    this.subscription?.unsubscribe();
+  cssClass(alert: Alert) {
+    if (!alert) return '';
+
+    switch (alert.type) {
+      case AlertType.Success:
+        return 'toast-success';
+      case AlertType.Error:
+        return 'toast-error';
+      case AlertType.Info:
+        return 'toast-info';
+      case AlertType.Warning:
+        return 'toast-warning';
+      default:
+        return 'toast-info';
+    }
   }
 }

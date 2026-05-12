@@ -48,7 +48,8 @@
       error: () => {}
     });
 
-  this.clearAccountOnly();
+  this.stopRefreshTokenTimer();
+  this.accountSubject.next(null);
   this.router.navigate(['/account/login']);
 }
 
