@@ -57,18 +57,18 @@ export class AccountService {
   }
 
   refreshToken() {
-    return this.http.post<Account>(
-      `${baseUrl}/refresh-token`,
-      {},
-      { withCredentials: true }
-    ).pipe(
-      map(account => {
-        this.accountSubject.next(account);
-        this.startRefreshTokenTimer();
-        return account;
-      })
-    );
-  }
+  return this.http.post<any>(
+    `${environment.apiUrl}/accounts/refresh-token`,
+    {},
+    { withCredentials: true }
+  ).pipe(
+    map((account) => {
+      this.accountSubject.next(account);
+      this.startRefreshTokenTimer();
+      return account;
+    })
+  );
+}
 
   register(account: any) {
     return this.http.post(`${baseUrl}/register`, account);
