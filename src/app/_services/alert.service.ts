@@ -8,9 +8,7 @@ import { Alert, AlertType, AlertOptions } from '../_models';
 export class AlertService {
   private subject = new Subject<Alert>();
   private defaultId = 'default-alert';
-
-  // prevents repeated same alert spam
-  private activeMessages = new Set<string>();
+  private shownMessages = new Set<string>();
 
   onAlert(id = this.defaultId): Observable<Alert> {
     return this.subject.asObservable().pipe(
@@ -34,26 +32,25 @@ export class AlertService {
     this.alert(new Alert({ ...options, type: AlertType.Warning, message }));
   }
 
+  clear(id = this.defaultId) {
+    this.subject.next(new Alert({ id }));
+    this.shownMessages.clear();
+  }
+
   alert(alert: Alert) {
     alert.id = alert.id || this.defaultId;
 
-    const key = `${alert.id}-${alert.type}-${alert.message}`;
+    const key = `${alert.type}-${alert.message}`;
 
-    // do not show the same alert repeatedly
-    if (this.activeMessages.has(key)) {
+    if (this.shownMessages.has(key)) {
       return;
     }
 
-    this.activeMessages.add(key);
+    this.shownMessages.add(key);
     this.subject.next(alert);
 
-    // allow the same message again after 4 seconds
     setTimeout(() => {
-      this.activeMessages.delete(key);
+      this.shownMessages.delete(key);
     }, 4000);
-  }
-
-  clear(id = this.defaultId) {
-    this.subject.next(new Alert({ id }));
   }
 }

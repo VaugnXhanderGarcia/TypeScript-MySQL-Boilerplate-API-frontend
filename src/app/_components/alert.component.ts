@@ -1,83 +1,60 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 
+import { Alert, AlertType } from '../_models';
 import { AlertService } from '../_services/alert.service';
 
 @Component({
-  selector: 'app-alert',
-  standalone: false,
+  selector: 'alert',
+  imports: [CommonModule],
   templateUrl: './alert.component.html'
 })
 export class AlertComponent implements OnInit, OnDestroy {
-  alerts: any[] = [];
-  alertSubscription!: Subscription;
-  routeSubscription!: Subscription;
+  alerts: Alert[] = [];
+  private subscription?: Subscription;
 
-  constructor(
-    private router: Router,
-    private alertService: AlertService
-  ) {}
+  constructor(private alertService: AlertService) {}
 
   ngOnInit() {
-    this.alertSubscription = this.alertService.onAlert()
-      .subscribe(alert => {
-        if (!alert) {
-          this.alerts = [];
-          return;
-        }
+    this.subscription = this.alertService.onAlert().subscribe(alert => {
+      if (!alert.message) {
+        this.alerts = [];
+        return;
+      }
 
-        this.alerts.push(alert);
-      });
+      this.alerts = [alert];
 
-    this.routeSubscription = this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        this.alerts = this.alerts.filter(x => x.keepAfterRouteChange);
-
-        this.alerts.forEach(x => {
-          x.keepAfterRouteChange = false;
-        });
+      if (alert.autoClose !== false) {
+        setTimeout(() => this.removeAlert(alert), 4000);
       }
     });
   }
 
   ngOnDestroy() {
-    if (this.alertSubscription) {
-      this.alertSubscription.unsubscribe();
-    }
-
-    if (this.routeSubscription) {
-      this.routeSubscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
   }
 
-  removeAlert(alert: any) {
+  removeAlert(alert: Alert) {
     this.alerts = this.alerts.filter(x => x !== alert);
   }
 
-  cssClasses(alert: any) {
-    if (!alert) return '';
-
-    const classes = ['alert', 'alert-dismissable', 'mt-4', 'container'];
-
-    const alertType = alert.type;
-
-    if (alertType === 'success') {
-      classes.push('alert-success');
+  cssClass(alert: Alert) {
+    if (!alert) {
+      return '';
     }
 
-    if (alertType === 'error') {
-      classes.push('alert-danger');
+    switch (alert.type) {
+      case AlertType.Success:
+        return 'alert-success';
+      case AlertType.Error:
+        return 'alert-danger';
+      case AlertType.Info:
+        return 'alert-info';
+      case AlertType.Warning:
+        return 'alert-warning';
+      default:
+        return 'alert-primary';
     }
-
-    if (alertType === 'info') {
-      classes.push('alert-info');
-    }
-
-    if (alertType === 'warning') {
-      classes.push('alert-warning');
-    }
-
-    return classes.join(' ');
   }
 }

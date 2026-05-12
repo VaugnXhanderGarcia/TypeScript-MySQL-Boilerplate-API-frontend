@@ -1,20 +1,25 @@
-<div class="alert-container">
+<div
+  class="position-fixed top-0 end-0 p-3"
+  style="z-index: 9999; width: min(420px, calc(100vw - 24px));">
+
   <div
     *ngFor="let alert of alerts"
-    class="custom-alert"
-    [ngClass]="{
-      'custom-alert-success': alert.type === 'success',
-      'custom-alert-error': alert.type === 'error',
-      'custom-alert-info': alert.type === 'info',
-      'custom-alert-warning': alert.type === 'warning'
-    }">
+    class="alert alert-dismissible fade show shadow-sm mb-2"
+    [ngClass]="cssClass(alert)"
+    role="alert">
 
-    <div class="custom-alert-message">
-      {{ alert.message }}
+    <div class="d-flex align-items-start">
+      <div class="flex-grow-1">
+        {{ alert.message }}
+      </div>
+
+      <button
+        type="button"
+        class="btn-close ms-2"
+        aria-label="Close"
+        (click)="removeAlert(alert)">
+      </button>
     </div>
-
-    <button type="button" class="custom-alert-close" (click)="removeAlert(alert)">
-      &times;
-    </button>
   </div>
+
 </div>

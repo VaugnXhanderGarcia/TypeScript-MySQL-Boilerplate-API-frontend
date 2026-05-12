@@ -3,39 +3,33 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 
-import { App } from './app';
+import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing-module';
 
+import { appInitializer } from './_helpers/app.initializer';
+import { JwtInterceptor } from './_helpers/jwt.interceptor';
+import { ErrorInterceptor } from './_helpers/error.interceptor';
+
+import { AccountService } from './_services/account.service';
 import { AlertComponent } from './_components/alert.component';
-
-import { AccountService } from './_services';
-import {
-  appInitializer,
-  JwtInterceptor,
-  ErrorInterceptor
-} from './_helpers';
-
-export function initializeApp(accountService: AccountService) {
-  return () => appInitializer(accountService);
-}
 
 @NgModule({
   declarations: [
-    App,
-    AlertComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
     ReactiveFormsModule,
     HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    AlertComponent
   ],
   providers: [
     {
       provide: APP_INITIALIZER,
-      useFactory: initializeApp,
-      deps: [AccountService],
-      multi: true
+      useFactory: appInitializer,
+      multi: true,
+      deps: [AccountService]
     },
     {
       provide: HTTP_INTERCEPTORS,
@@ -48,6 +42,6 @@ export function initializeApp(accountService: AccountService) {
       multi: true
     }
   ],
-  bootstrap: [App]
+  bootstrap: [AppComponent]
 })
 export class AppModule {}

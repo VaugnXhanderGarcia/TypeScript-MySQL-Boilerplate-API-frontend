@@ -9,8 +9,7 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { AccountService } from '../_services/account.service';
-import { AlertService } from '../_services/alert.service';
+import { AccountService, AlertService } from '../_services';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
@@ -22,26 +21,24 @@ export class ErrorInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        let errorMessage = 'Unknown Error';
+        const isRefreshTokenRequest = request.url.includes('/accounts/refresh-token');
 
-        if (error.error) {
-          if (typeof error.error === 'string') {
-            errorMessage = error.error;
-          } else if (error.error.message) {
-            errorMessage = error.error.message;
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-        } else if (error.message) {
-          errorMessage = error.message;
+        if (isRefreshTokenRequest) {
+          return throwError(() => error);
         }
 
         if ([401, 403].includes(error.status) && this.accountService.accountValue) {
           this.accountService.logout();
         }
 
-        this.alertService.error(errorMessage);
-        return throwError(() => errorMessage);
+        const message =
+          error.error?.message ||
+          error.statusText ||
+          'Something went wrong. Please try again.';
+
+        this.alertService.error(message);
+
+        return throwError(() => error);
       })
     );
   }
