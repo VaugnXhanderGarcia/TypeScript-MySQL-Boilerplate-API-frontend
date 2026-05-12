@@ -3,12 +3,7 @@
     <a routerLink="/" class="nav-item nav-link">Home</a>
     <a routerLink="/profile" class="nav-item nav-link">Profile</a>
 
-    <a
-      *ngIf="account.role === 'Admin'"
-      routerLink="/admin/accounts"
-      class="nav-item nav-link">
-      Accounts
-    </a>
+    <a routerLink="/admin/accounts" class="nav-item nav-link">Accounts</a>
 
     <a (click)="logout()" class="nav-item nav-link" style="cursor: pointer;">
       Logout

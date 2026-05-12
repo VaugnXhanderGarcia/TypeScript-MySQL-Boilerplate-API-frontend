@@ -1,38 +1,47 @@
 import { Injectable } from '@angular/core';
-import {
-  ActivatedRouteSnapshot,
-  Router,
-  RouterStateSnapshot
-} from '@angular/router';
+import { Router, CanActivate } from '@angular/router';
 
 import { AccountService, AlertService } from '../_services';
 
 @Injectable({ providedIn: 'root' })
-export class AuthGuard {
+export class AuthGuard implements CanActivate {
+  constructor(
+    private router: Router,
+    private accountService: AccountService
+  ) {}
+
+  canActivate() {
+    const account = this.accountService.accountValue;
+
+    if (account) {
+      return true;
+    }
+
+    this.router.navigate(['/account/login']);
+    return false;
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class AdminGuard implements CanActivate {
   constructor(
     private router: Router,
     private accountService: AccountService,
     private alertService: AlertService
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+  canActivate() {
     const account = this.accountService.accountValue;
 
-    if (!account) {
-      this.router.navigate(['/account/login'], {
-        queryParams: { returnUrl: state.url }
-      });
-      return false;
+    if (account && account.role === 'Admin') {
+      return true;
     }
 
-    const roles = route.data['roles'] as string[] | undefined;
+    this.alertService.error('Admin access only.', {
+      keepAfterRouteChange: true
+    });
 
-    if (roles && roles.length && (!account.role || !roles.includes(account.role))) {
-      this.alertService.error('Admin access only.');
-      this.router.navigate(['/']);
-      return false;
-    }
-
-    return true;
+    this.router.navigate(['/']);
+    return false;
   }
 }
