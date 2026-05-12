@@ -9,33 +9,38 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { AccountService } from '../_services';
+import { AccountService } from '../_services/account.service';
+import { AlertService } from '../_services/alert.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  constructor(private accountService: AccountService) {}
+  constructor(
+    private accountService: AccountService,
+    private alertService: AlertService
+  ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
-      catchError((err: HttpErrorResponse) => {
+      catchError((error: HttpErrorResponse) => {
         let errorMessage = 'Unknown Error';
 
-        if (err.error) {
-          if (typeof err.error === 'string') {
-            errorMessage = err.error;
-          } else if (err.error.message) {
-            errorMessage = err.error.message;
-          } else if (err.message) {
-            errorMessage = err.message;
+        if (error.error) {
+          if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.error.message) {
+            errorMessage = error.error.message;
+          } else if (error.message) {
+            errorMessage = error.message;
           }
-        } else if (err.message) {
-          errorMessage = err.message;
+        } else if (error.message) {
+          errorMessage = error.message;
         }
 
-        if ([401, 403].includes(err.status) && this.accountService.accountValue) {
+        if ([401, 403].includes(error.status) && this.accountService.accountValue) {
           this.accountService.logout();
         }
 
+        this.alertService.error(errorMessage);
         return throwError(() => errorMessage);
       })
     );
