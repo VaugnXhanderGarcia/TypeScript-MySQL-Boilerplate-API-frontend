@@ -9,8 +9,13 @@ export class AlertService {
   private subject = new Subject<Alert>();
   private defaultId = 'default-alert';
 
+  // prevents repeated same alert spam
+  private activeMessages = new Set<string>();
+
   onAlert(id = this.defaultId): Observable<Alert> {
-    return this.subject.asObservable().pipe(filter(x => x && x.id === id));
+    return this.subject.asObservable().pipe(
+      filter(x => x && x.id === id)
+    );
   }
 
   success(message: string, options?: AlertOptions) {
@@ -31,8 +36,21 @@ export class AlertService {
 
   alert(alert: Alert) {
     alert.id = alert.id || this.defaultId;
-    alert.autoClose = alert.autoClose === undefined ? true : alert.autoClose;
+
+    const key = `${alert.id}-${alert.type}-${alert.message}`;
+
+    // do not show the same alert repeatedly
+    if (this.activeMessages.has(key)) {
+      return;
+    }
+
+    this.activeMessages.add(key);
     this.subject.next(alert);
+
+    // allow the same message again after 4 seconds
+    setTimeout(() => {
+      this.activeMessages.delete(key);
+    }, 4000);
   }
 
   clear(id = this.defaultId) {

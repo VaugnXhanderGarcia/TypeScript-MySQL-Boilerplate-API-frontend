@@ -5,7 +5,10 @@ export function appInitializer(accountService: AccountService) {
     new Promise<void>((resolve) => {
       accountService.refreshToken().subscribe({
         next: () => resolve(),
-        error: () => resolve()
+        error: () => {
+          accountService.clearAccountOnly();
+          resolve();
+        }
       });
     });
 }

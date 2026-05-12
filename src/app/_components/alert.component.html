@@ -1,8 +1,20 @@
-<div *ngIf="alerts.length" class="container">
-  <div class="m-3">
-    <div *ngFor="let alert of alerts" class="{{ cssClasses(alert) }}">
-      <span>{{ alert.message }}</span>
-      <button class="btn-close" (click)="removeAlert(alert)"></button>
+<div class="alert-container">
+  <div
+    *ngFor="let alert of alerts"
+    class="custom-alert"
+    [ngClass]="{
+      'custom-alert-success': alert.type === 'success',
+      'custom-alert-error': alert.type === 'error',
+      'custom-alert-info': alert.type === 'info',
+      'custom-alert-warning': alert.type === 'warning'
+    }">
+
+    <div class="custom-alert-message">
+      {{ alert.message }}
     </div>
+
+    <button type="button" class="custom-alert-close" (click)="removeAlert(alert)">
+      &times;
+    </button>
   </div>
 </div>
