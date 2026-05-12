@@ -1,17 +1,20 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing-module';
 
-import { appInitializer } from './_helpers/app.initializer';
-import { JwtInterceptor } from './_helpers/jwt.interceptor';
-import { ErrorInterceptor } from './_helpers/error.interceptor';
-
-import { AccountService } from './_services/account.service';
 import { AlertComponent } from './_components/alert.component';
+
+import {
+  appInitializer,
+  JwtInterceptor,
+  ErrorInterceptor
+} from './_helpers';
+
+import { AccountService } from './_services';
 
 @NgModule({
   declarations: [

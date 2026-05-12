@@ -8,7 +8,6 @@ import { Alert, AlertType, AlertOptions } from '../_models';
 export class AlertService {
   private subject = new Subject<Alert>();
   private defaultId = 'default-alert';
-  private shownMessages = new Set<string>();
 
   onAlert(id = this.defaultId): Observable<Alert> {
     return this.subject.asObservable().pipe(
@@ -34,23 +33,10 @@ export class AlertService {
 
   clear(id = this.defaultId) {
     this.subject.next(new Alert({ id }));
-    this.shownMessages.clear();
   }
 
-  alert(alert: Alert) {
+  private alert(alert: Alert) {
     alert.id = alert.id || this.defaultId;
-
-    const key = `${alert.type}-${alert.message}`;
-
-    if (this.shownMessages.has(key)) {
-      return;
-    }
-
-    this.shownMessages.add(key);
     this.subject.next(alert);
-
-    setTimeout(() => {
-      this.shownMessages.delete(key);
-    }, 4000);
   }
 }
