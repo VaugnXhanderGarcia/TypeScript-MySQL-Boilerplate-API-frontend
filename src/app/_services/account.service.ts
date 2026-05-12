@@ -98,14 +98,8 @@ export class AccountService {
   }
 
   getAll() {
-    return this.http.get<Account[]>(baseUrl, {
-      withCredentials: true,
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache'
-      }
-    });
-  }
+  return this.http.get<Account[]>(baseUrl, { withCredentials: true });
+}
 
   getById(id: string) {
     return this.http.get<Account>(`${baseUrl}/${id}`, {
