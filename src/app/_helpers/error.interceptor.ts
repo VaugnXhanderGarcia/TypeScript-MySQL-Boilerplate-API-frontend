@@ -9,37 +9,34 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { AccountService, AlertService } from '../_services';
+import { AccountService } from '../_services';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  constructor(
-    private accountService: AccountService,
-    private alertService: AlertService
-  ) {}
+  constructor(private accountService: AccountService) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
       catchError((err: HttpErrorResponse) => {
-        const isRefreshTokenRequest = request.url.includes('/accounts/refresh-token');
+        let errorMessage = 'Unknown Error';
 
-        if (isRefreshTokenRequest) {
-          return throwError(() => err);
+        if (err.error) {
+          if (typeof err.error === 'string') {
+            errorMessage = err.error;
+          } else if (err.error.message) {
+            errorMessage = err.error.message;
+          } else if (err.message) {
+            errorMessage = err.message;
+          }
+        } else if (err.message) {
+          errorMessage = err.message;
         }
 
         if ([401, 403].includes(err.status) && this.accountService.accountValue) {
           this.accountService.logout();
         }
 
-        const error =
-          err.error?.message ||
-          err.error?.title ||
-          err.statusText ||
-          'Unknown Error';
-
-        this.alertService.error(error);
-
-        return throwError(() => err);
+        return throwError(() => errorMessage);
       })
     );
   }
