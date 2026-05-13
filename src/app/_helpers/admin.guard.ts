@@ -1,26 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Router, CanActivate } from '@angular/router';
+import {
+  Router,
+  CanActivate,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot
+} from '@angular/router';
 
-import { AccountService, AlertService } from '../_services';
-
-@Injectable({ providedIn: 'root' })
-export class AuthGuard implements CanActivate {
-  constructor(
-    private router: Router,
-    private accountService: AccountService
-  ) {}
-
-  canActivate() {
-    const account = this.accountService.accountValue;
-
-    if (account) {
-      return true;
-    }
-
-    this.router.navigate(['/account/login']);
-    return false;
-  }
-}
+import { AccountService } from '../_services';
+import { AlertService } from '../_services/alert.service';
 
 @Injectable({ providedIn: 'root' })
 export class AdminGuard implements CanActivate {
@@ -30,7 +17,7 @@ export class AdminGuard implements CanActivate {
     private alertService: AlertService
   ) {}
 
-  canActivate() {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const account = this.accountService.accountValue;
 
     if (account && account.role === 'Admin') {

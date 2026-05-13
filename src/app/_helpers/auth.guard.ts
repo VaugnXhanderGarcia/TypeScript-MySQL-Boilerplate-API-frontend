@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Router, CanActivate } from '@angular/router';
+import {
+  CanActivate,
+  ActivatedRouteSnapshot,
+  Router,
+  RouterStateSnapshot
+} from '@angular/router';
 
 import { AccountService, AlertService } from '../_services';
 
@@ -10,14 +15,17 @@ export class AuthGuard implements CanActivate {
     private accountService: AccountService
   ) {}
 
-  canActivate() {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const account = this.accountService.accountValue;
 
     if (account) {
       return true;
     }
 
-    this.router.navigate(['/account/login']);
+    this.router.navigate(['/account/login'], {
+      queryParams: { returnUrl: state.url }
+    });
+
     return false;
   }
 }
@@ -30,18 +38,19 @@ export class AdminGuard implements CanActivate {
     private alertService: AlertService
   ) {}
 
-  canActivate() {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const account = this.accountService.accountValue;
 
-    if (account && account.role === 'Admin') {
+    if (account?.role === 'Admin') {
       return true;
     }
 
-    this.alertService.error('Admin access only.', {
+    this.alertService.error('Admin access only', {
       keepAfterRouteChange: true
     });
 
     this.router.navigate(['/']);
+
     return false;
   }
 }
