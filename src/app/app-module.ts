@@ -2,7 +2,7 @@ import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
-
+import { AccountService } from './_services';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing-module';
 
@@ -30,7 +30,8 @@ import {
     {
       provide: APP_INITIALIZER,
       useFactory: appInitializer,
-      multi: true
+      multi: true,
+      deps: [AccountService]
     },
 
     JwtInterceptor,
