@@ -36,26 +36,29 @@ export class LoginComponent implements OnInit {
     return this.form.controls;
   }
 
-  onSubmit() {
-    this.submitted = true;
-    this.alertService.clear();
+ onSubmit() {
+  this.submitted = true;
 
-    if (this.form.invalid) {
-      return;
-    }
+  this.alertService.clear();
 
-    this.loading = true;
-
-    this.accountService.login(this.f['email'].value, this.f['password'].value)
-  .subscribe({
-    next: () => {
-      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-      this.router.navigateByUrl(returnUrl);
-    },
-    error: error => {
-      this.alertService.error(error);
-      this.loading = false;
-    }
-  });
+  if (this.form.invalid) {
+    return;
   }
+
+  this.loading = true;
+
+  this.accountService.login(this.f['email'].value, this.f['password'].value)
+    .subscribe({
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+        this.router.navigateByUrl(returnUrl);
+      },
+      error: error => {
+        const message = error?.error?.message || error || 'Login failed. Please try again.';
+
+        this.alertService.error(message);
+        this.loading = false;
+      }
+    });
+}
 }

@@ -1,14 +1,8 @@
-<div class="alert-toast-wrapper" *ngIf="alerts.length">
-  <div
-    *ngFor="let alert of alerts"
-    class="alert-toast"
-    [ngClass]="cssClass(alert)"
-  >
-    <div class="alert-message">
-      {{ alert.message }}
-    </div>
+<div class="alert-container">
+  <div *ngFor="let alert of alerts" [ngClass]="cssClass(alert)">
+    <span>{{ alert.message }}</span>
 
-    <button type="button" class="alert-close" (click)="removeAlert(alert)">
+    <button type="button" class="btn-close" (click)="removeAlert(alert)">
       ×
     </button>
   </div>

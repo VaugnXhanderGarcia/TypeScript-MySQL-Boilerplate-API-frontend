@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
-
+import { Router } from '@angular/router';
 import { AccountService, AlertService } from '../_services';
 
 @Component({
@@ -14,10 +14,11 @@ export class ForgotPasswordComponent implements OnInit {
   submitted = false;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private accountService: AccountService,
-    private alertService: AlertService
-  ) {}
+  private formBuilder: FormBuilder,
+  private router: Router,
+  private accountService: AccountService,
+  private alertService: AlertService
+) {}
 
   ngOnInit() {
     this.form = this.formBuilder.group({
@@ -30,26 +31,30 @@ export class ForgotPasswordComponent implements OnInit {
   }
 
   onSubmit() {
-    this.submitted = true;
-    this.alertService.clear();
+  this.submitted = true;
 
-    if (this.form.invalid) {
-      return;
-    }
+  this.alertService.clear();
 
-    this.loading = true;
-
-    this.accountService.forgotPassword(this.f['email'].value)
-      .pipe(first())
-      .subscribe({
-        next: () => {
-          this.alertService.success('Password reset request sent.');
-          this.loading = false;
-        },
-        error: error => {
-          this.alertService.error(error);
-          this.loading = false;
-        }
-      });
+  if (this.form.invalid) {
+    return;
   }
+
+  this.loading = true;
+
+  this.accountService.forgotPassword(this.f['email'].value)
+    .subscribe({
+      next: () => {
+        this.alertService.success(
+          'Password reset email sent. Please check your email.',
+          { keepAfterRouteChange: true }
+        );
+
+        this.router.navigate(['/account/login']);
+      },
+      error: error => {
+        this.alertService.error(error?.error?.message || error || 'Unable to send reset email.');
+        this.loading = false;
+      }
+    });
+}
 }

@@ -49,3 +49,125 @@
   cursor: pointer;
   color: inherit;
 }
+
+.toast-wrapper {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: auto;
+  min-width: 320px;
+  max-width: 600px;
+  pointer-events: none;
+}
+
+.custom-toast {
+  pointer-events: auto;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 15px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: fadeInDown 0.25s ease-in-out;
+}
+
+.custom-toast-success {
+  background-color: #198754;
+}
+
+.custom-toast-error {
+  background-color: #dc3545;
+}
+
+.custom-toast-info {
+  background-color: #0dcaf0;
+  color: #000;
+}
+
+.custom-toast-warning {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 22px;
+  margin-left: 16px;
+  cursor: pointer;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-container {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: 90%;
+  max-width: 500px;
+  pointer-events: none;
+}
+
+.alert-floating {
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.alert-success {
+  background: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
+.alert-danger {
+  background: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+}
+
+.alert-info {
+  background: #cff4fc;
+  color: #055160;
+  border: 1px solid #b6effb;
+}
+
+.alert-warning {
+  background: #fff3cd;
+  color: #664d03;
+  border: 1px solid #ffecb5;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  margin-left: 15px;
+}

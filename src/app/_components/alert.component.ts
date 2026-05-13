@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NavigationStart, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { Alert, AlertType } from '../_models';
@@ -7,30 +7,44 @@ import { AlertService } from '../_services';
 
 @Component({
   selector: 'app-alert',
-  standalone: true,
-  imports: [CommonModule],
   templateUrl: './alert.component.html',
-  styleUrls: ['./alert.component.css']
+  standalone: false
 })
 export class AlertComponent implements OnInit, OnDestroy {
   alerts: Alert[] = [];
   private subscription?: Subscription;
+  private routeSubscription?: Subscription;
 
-  constructor(private alertService: AlertService) {}
+  constructor(
+    private router: Router,
+    private alertService: AlertService
+  ) {}
 
   ngOnInit() {
-    this.subscription = this.alertService.onAlert().subscribe(alert => {
-      if (!alert.message) {
-        this.alerts = [];
-        return;
-      }
+    this.subscription = this.alertService.onAlert()
+      .subscribe(alert => {
+        if (!alert.message) {
+          this.alerts = [];
+          return;
+        }
 
-      this.alerts = [alert];
+        this.alerts = [alert];
+
+        setTimeout(() => {
+          this.removeAlert(alert);
+        }, 3000);
+      });
+
+    this.routeSubscription = this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.alerts = [];
+      }
     });
   }
 
   ngOnDestroy() {
     this.subscription?.unsubscribe();
+    this.routeSubscription?.unsubscribe();
   }
 
   removeAlert(alert: Alert) {
@@ -40,17 +54,23 @@ export class AlertComponent implements OnInit, OnDestroy {
   cssClass(alert: Alert) {
     if (!alert) return '';
 
+    const classes = ['alert-floating'];
+
     switch (alert.type) {
       case AlertType.Success:
-        return 'toast-success';
+        classes.push('alert-success');
+        break;
       case AlertType.Error:
-        return 'toast-error';
+        classes.push('alert-danger');
+        break;
       case AlertType.Info:
-        return 'toast-info';
+        classes.push('alert-info');
+        break;
       case AlertType.Warning:
-        return 'toast-warning';
-      default:
-        return 'toast-info';
+        classes.push('alert-warning');
+        break;
     }
+
+    return classes.join(' ');
   }
 }
