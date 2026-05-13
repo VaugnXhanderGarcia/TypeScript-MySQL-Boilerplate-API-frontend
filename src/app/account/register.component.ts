@@ -43,31 +43,32 @@ export class RegisterComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
+
     this.alertService.clear();
 
     if (this.form.invalid) {
-      return;
+        return;
     }
 
     this.loading = true;
 
-   this.accountService.register(this.form.value)
-  .pipe(first())
-  .subscribe({
-    next: (res: any) => {
-      this.alertService.success(
-        res?.message || 'Registration successful. Please check your email to verify your account.',
-        { keepAfterRouteChange: true }
-      );
+    this.accountService.register(this.form.value)
+        .pipe(first())
+        .subscribe({
+            next: (res: any) => {
+                this.alertService.success(
+                    res?.message || 'Registration successful. Please check your email to verify your account.',
+                    { keepAfterRouteChange: true }
+                );
 
-      this.router.navigate(['/account/login']);
-    },
-    error: error => {
-      this.alertService.error(error);
-      this.loading = false;
-    }
-  });
-  }
+                this.router.navigate(['/account/login']);
+            },
+            error: error => {
+                this.alertService.error(error);
+                this.loading = false;
+            }
+        });
+}
 
   private mustMatch(controlName: string, matchingControlName: string) {
     return (formGroup: FormGroup) => {

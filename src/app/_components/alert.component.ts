@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 
 import { Alert, AlertType } from '../_models';
@@ -6,13 +7,14 @@ import { AlertService } from '../_services';
 
 @Component({
   selector: 'app-alert',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './alert.component.html',
-  styleUrls: ['./alert.component.css'],
-  standalone: false
+  styleUrls: ['./alert.component.css']
 })
 export class AlertComponent implements OnInit, OnDestroy {
   alerts: Alert[] = [];
-  private subscription?: Subscription;
+  subscription?: Subscription;
 
   constructor(private alertService: AlertService) {}
 
@@ -24,7 +26,8 @@ export class AlertComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.alerts = [alert];
+        this.alerts = this.alerts.filter(x => x.message !== alert.message);
+        this.alerts.push(alert);
 
         setTimeout(() => {
           this.removeAlert(alert);
@@ -43,17 +46,23 @@ export class AlertComponent implements OnInit, OnDestroy {
   cssClass(alert: Alert) {
     if (!alert) return '';
 
+    const classes = ['custom-toast'];
+
     switch (alert.type) {
       case AlertType.Success:
-        return 'alert-success';
+        classes.push('custom-toast-success');
+        break;
       case AlertType.Error:
-        return 'alert-danger';
+        classes.push('custom-toast-error');
+        break;
       case AlertType.Info:
-        return 'alert-info';
+        classes.push('custom-toast-info');
+        break;
       case AlertType.Warning:
-        return 'alert-warning';
-      default:
-        return '';
+        classes.push('custom-toast-warning');
+        break;
     }
+
+    return classes.join(' ');
   }
 }
