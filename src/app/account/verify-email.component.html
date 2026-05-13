@@ -1,9 +1,8 @@
-<h4>Verify Email</h4>
+<div class="text-center mt-5">
+  <h3>Email Verification</h3>
 
-<div *ngIf="emailStatus === EmailStatus.Verifying">
-  Verifying...
-</div>
-
-<div *ngIf="emailStatus === EmailStatus.Failed">
-  Verification failed. While email is disabled, manually verify the account in MySQL.
+  <div *ngIf="loading" class="mt-3">
+    <span class="spinner-border spinner-border-sm me-2"></span>
+    Verifying your email...
+  </div>
 </div>

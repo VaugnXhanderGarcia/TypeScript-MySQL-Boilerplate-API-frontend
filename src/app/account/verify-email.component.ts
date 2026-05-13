@@ -1,21 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { first } from 'rxjs/operators';
-
 import { AccountService, AlertService } from '../_services';
 
-enum EmailStatus {
-  Verifying,
-  Failed
-}
-
 @Component({
-  standalone: false,
-  templateUrl: './verify-email.component.html'
+  selector: 'app-verify-email',
+  templateUrl: './verify-email.component.html',
+  standalone: false
 })
 export class VerifyEmailComponent implements OnInit {
-  EmailStatus = EmailStatus;
-  emailStatus = EmailStatus.Verifying;
+  loading = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -25,26 +18,43 @@ export class VerifyEmailComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-  const token = this.route.snapshot.queryParams['token'];
+    const token = this.route.snapshot.queryParams['token'];
 
-  if (!token) {
-    this.alertService.error('Invalid verification link');
-    this.router.navigate(['../login'], { relativeTo: this.route });
-    return;
-  }
+    if (!token) {
+      this.loading = false;
+      this.alertService.error('Verification token is missing.', {
+        keepAfterRouteChange: true
+      });
+      this.router.navigate(['/account/login']);
+      return;
+    }
 
-  this.accountService.verifyEmail(token)
-    .subscribe({
+    this.accountService.verifyEmail(token).subscribe({
       next: () => {
-        this.alertService.success('Verification successful. You can now login.', {
+        this.loading = false;
+
+        this.alertService.success('Email verified successfully. You can now log in.', {
           keepAfterRouteChange: true
         });
-        this.router.navigate(['../login'], { relativeTo: this.route });
+
+        const lastUrl = localStorage.getItem('lastUrlBeforeVerify');
+
+        if (lastUrl) {
+          localStorage.removeItem('lastUrlBeforeVerify');
+          this.router.navigateByUrl(lastUrl);
+        } else {
+          this.router.navigate(['/account/login']);
+        }
       },
-      error: error => {
-        this.alertService.error(error);
-        this.router.navigate(['../login'], { relativeTo: this.route });
+      error: (error) => {
+        this.loading = false;
+
+        this.alertService.error(error?.error?.message || 'Invalid or expired verification token.', {
+          keepAfterRouteChange: true
+        });
+
+        this.router.navigate(['/account/login']);
       }
     });
-}
+  }
 }

@@ -27,7 +27,7 @@
       return this.accountSubject.value;
     }
 
-    login(email: string, password: string) {
+   login(email: string, password: string) {
   return this.http.post<Account>(
     `${baseUrl}/authenticate`,
     { email, password },
@@ -54,17 +54,17 @@
 }
 
     refreshToken() {
-    return this.http.post<Account>(
-        `${baseUrl}/refresh-token`,
-        {},
-        { withCredentials: true }
-    ).pipe(
-        map(account => {
-            this.accountSubject.next(account);
-            this.startRefreshTokenTimer();
-            return account;
-        })
-    );
+  return this.http.post<Account>(
+    `${baseUrl}/refresh-token`,
+    {},
+    { withCredentials: true }
+  ).pipe(
+    map(account => {
+      this.accountSubject.next(account);
+      this.startRefreshTokenTimer();
+      return account;
+    })
+  );
 }
 
     register(account: any) {
@@ -183,9 +183,9 @@
       }
     }
 
-    clearAccountOnly() {
+   clearAccountOnly() {
   this.stopRefreshTokenTimer();
-  localStorage.removeItem('account');
   this.accountSubject.next(null);
+  this.router.navigate(['/account/login']);
 }
   }
