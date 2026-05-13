@@ -1,7 +1,13 @@
-<div class="alert-container" *ngIf="alerts.length">
-  <div *ngFor="let alert of alerts" [ngClass]="cssClass(alert)">
+<div class="toast-container">
+  <div
+    *ngFor="let alert of alerts"
+    class="custom-toast"
+    [ngClass]="cssClass(alert)"
+  >
     <span>{{ alert.message }}</span>
 
-    <button type="button" class="btn-close ms-3" aria-label="Close" (click)="removeAlert(alert)"></button>
+    <button type="button" class="toast-close" (click)="removeAlert(alert)">
+      &times;
+    </button>
   </div>
 </div>

@@ -51,22 +51,22 @@ export class RegisterComponent implements OnInit {
 
     this.loading = true;
 
-    this.accountService.register(this.form.value)
-      .pipe(first())
-      .subscribe({
-        next: (response: any) => {
-          this.alertService.success(
-            response?.message || 'Registration successful. Please check your email to verify your account.',
-            { keepAfterRouteChange: true }
-          );
+   this.accountService.register(this.form.value)
+  .pipe(first())
+  .subscribe({
+    next: (res: any) => {
+      this.alertService.success(
+        res?.message || 'Registration successful. Please verify your email before logging in.',
+        { keepAfterRouteChange: true }
+      );
 
-          this.router.navigate(['../login'], { relativeTo: this.route });
-        },
-        error: error => {
-          this.alertService.error(error);
-          this.loading = false;
-        }
-      });
+      this.router.navigate(['/account/login']);
+    },
+    error: error => {
+      this.alertService.error(error);
+      this.loading = false;
+    }
+  });
   }
 
   private mustMatch(controlName: string, matchingControlName: string) {
