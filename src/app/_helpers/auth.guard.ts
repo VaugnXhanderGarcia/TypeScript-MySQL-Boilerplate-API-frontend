@@ -40,18 +40,23 @@ export class AdminGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const account = this.accountService.accountValue;
-    const role = account?.role?.toString().trim().toLowerCase();
 
-    if (role === 'admin') {
-      return true;
+    if (!account) {
+      this.router.navigate(['/account/login'], {
+        queryParams: { returnUrl: state.url }
+      });
+      return false;
     }
 
-    this.alertService.error('Admin access only', {
-      keepAfterRouteChange: true
-    });
+    if (account.role !== 'Admin') {
+      this.alertService.error('Admin access only', {
+        keepAfterRouteChange: true
+      });
 
-    this.router.navigate(['/']);
+      this.router.navigate(['/']);
+      return false;
+    }
 
-    return false;
+    return true;
   }
 }

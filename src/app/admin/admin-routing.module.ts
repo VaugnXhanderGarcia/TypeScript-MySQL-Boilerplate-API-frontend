@@ -17,8 +17,7 @@ const routes: Routes = [
       { path: '', component: OverviewComponent },
       {
         path: 'accounts',
-        loadChildren: () =>
-          import('./accounts/accounts.module').then(x => x.AccountsModule),
+        loadChildren: accountsModule,
         canActivate: [AdminGuard]
       }
     ]
