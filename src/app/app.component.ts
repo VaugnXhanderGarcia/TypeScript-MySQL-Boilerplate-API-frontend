@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { AccountService } from './_services';
+
 import { Account } from './_models';
+import { AccountService } from './_services';
 
 @Component({
   selector: 'app-root',
@@ -14,11 +15,7 @@ export class AppComponent {
     this.accountService.account.subscribe(x => this.account = x);
   }
 
-  logout(event?: Event) {
-    if (event) {
-      event.preventDefault();
-    }
-
+  logout() {
     this.accountService.logout();
   }
 }

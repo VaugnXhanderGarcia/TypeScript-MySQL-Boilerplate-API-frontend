@@ -1,5 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { Alert, AlertType } from '../_models';
@@ -7,32 +6,28 @@ import { AlertService } from '../_services';
 
 @Component({
   selector: 'app-alert',
-  standalone: true,
-  imports: [CommonModule],
   templateUrl: './alert.component.html',
-  styleUrls: ['./alert.component.css']
+  standalone: false
 })
 export class AlertComponent implements OnInit, OnDestroy {
   alerts: Alert[] = [];
-  subscription?: Subscription;
+  private subscription?: Subscription;
 
   constructor(private alertService: AlertService) {}
 
   ngOnInit() {
-    this.subscription = this.alertService.onAlert()
-      .subscribe(alert => {
-        if (!alert.message) {
-          this.alerts = [];
-          return;
-        }
+    this.subscription = this.alertService.onAlert().subscribe(alert => {
+      if (!alert.message) {
+        this.alerts = [];
+        return;
+      }
 
-        this.alerts = this.alerts.filter(x => x.message !== alert.message);
-        this.alerts.push(alert);
+      this.alerts = [alert];
 
-        setTimeout(() => {
-          this.removeAlert(alert);
-        }, 3500);
-      });
+      setTimeout(() => {
+        this.removeAlert(alert);
+      }, 3000);
+    });
   }
 
   ngOnDestroy() {
@@ -46,20 +41,20 @@ export class AlertComponent implements OnInit, OnDestroy {
   cssClass(alert: Alert) {
     if (!alert) return '';
 
-    const classes = ['custom-toast'];
+    const classes = ['alert', 'alert-dismissible', 'floating-alert'];
 
     switch (alert.type) {
       case AlertType.Success:
-        classes.push('custom-toast-success');
+        classes.push('alert-success');
         break;
       case AlertType.Error:
-        classes.push('custom-toast-error');
+        classes.push('alert-danger');
         break;
       case AlertType.Info:
-        classes.push('custom-toast-info');
+        classes.push('alert-info');
         break;
       case AlertType.Warning:
-        classes.push('custom-toast-warning');
+        classes.push('alert-warning');
         break;
     }
 

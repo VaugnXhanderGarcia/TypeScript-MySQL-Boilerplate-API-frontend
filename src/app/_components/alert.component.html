@@ -1,13 +1,12 @@
-<div class="toast-container">
-  <div
-    *ngFor="let alert of alerts"
-    class="custom-toast"
-    [ngClass]="cssClass(alert)"
-  >
+<div class="alert-container">
+  <div *ngFor="let alert of alerts" [ngClass]="cssClass(alert)" role="alert">
     <span>{{ alert.message }}</span>
 
-    <button type="button" class="toast-close" (click)="removeAlert(alert)">
-      ×
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="removeAlert(alert)">
     </button>
   </div>
 </div>
