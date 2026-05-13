@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
-  CanActivate,
   ActivatedRouteSnapshot,
+  CanActivate,
   Router,
   RouterStateSnapshot
 } from '@angular/router';
@@ -40,8 +40,9 @@ export class AdminGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const account = this.accountService.accountValue;
+    const role = account?.role?.toString().trim().toLowerCase();
 
-    if (account?.role === 'Admin') {
+    if (role === 'admin') {
       return true;
     }
 
