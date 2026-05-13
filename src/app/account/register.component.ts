@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first } from 'rxjs/operators';
+import { finalize } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
@@ -42,32 +42,31 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
-    this.submitted = true;
+  this.submitted = true;
 
-    this.alertService.clear();
+  this.alertService.clear();
 
-    if (this.form.invalid) {
-        return;
-    }
+  if (this.form.invalid) {
+    return;
+  }
 
-    this.loading = true;
+  this.loading = true;
 
-    this.accountService.register(this.form.value)
-        .pipe(first())
-        .subscribe({
-            next: (res: any) => {
-                this.alertService.success(
-                    res?.message || 'Registration successful. Please check your email to verify your account.',
-                    { keepAfterRouteChange: true }
-                );
+  this.accountService.register(this.form.value)
+    .pipe(finalize(() => this.loading = false))
+    .subscribe({
+      next: (res: any) => {
+        this.alertService.success(
+          res.message || 'Registration successful. Please check your email to verify your account.',
+          { keepAfterRouteChange: true }
+        );
 
-                this.router.navigate(['/account/login']);
-            },
-            error: error => {
-                this.alertService.error(error);
-                this.loading = false;
-            }
-        });
+        this.router.navigate(['/account/login']);
+      },
+      error: (error) => {
+        this.alertService.error(error);
+      }
+    });
 }
 
   private mustMatch(controlName: string, matchingControlName: string) {
