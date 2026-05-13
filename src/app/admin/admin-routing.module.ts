@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes, RouterModule } from '@angular/router';
 
 import { LayoutComponent } from './layout.component';
 import { OverviewComponent } from './overview.component';
@@ -15,11 +15,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', component: OverviewComponent },
-      {
-        path: 'accounts',
-        loadChildren: accountsModule,
-        canActivate: [AdminGuard]
-      }
+      { path: 'accounts', loadChildren: accountsModule, canActivate: [AdminGuard] }
     ]
   }
 ];

@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
-import { MustMatch } from '../_helpers';
 
 @Component({
-  standalone: false,
-  templateUrl: './register.component.html'
+  selector: 'app-register',
+  templateUrl: './register.component.html',
+  standalone: false
 })
 export class RegisterComponent implements OnInit {
   form!: FormGroup;
@@ -17,6 +17,7 @@ export class RegisterComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
+    private route: ActivatedRoute,
     private router: Router,
     private accountService: AccountService,
     private alertService: AlertService
@@ -24,16 +25,16 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.formBuilder.group({
-  title: ['', Validators.required],
-  firstName: ['', Validators.required],
-  lastName: ['', Validators.required],
-  email: ['', [Validators.required, Validators.email]],
-  password: ['', [Validators.required, Validators.minLength(6)]],
-  confirmPassword: ['', Validators.required],
-  acceptTerms: [false, Validators.requiredTrue]
-}, {
-  validators: MustMatch('password', 'confirmPassword')
-});
+      title: ['', Validators.required],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required],
+      acceptTerms: [false, Validators.requiredTrue]
+    }, {
+      validators: this.mustMatch('password', 'confirmPassword')
+    });
   }
 
   get f() {
@@ -51,19 +52,37 @@ export class RegisterComponent implements OnInit {
     this.loading = true;
 
     this.accountService.register(this.form.value)
-  .subscribe({
-    next: () => {
-      this.alertService.success(
-        'Registration successful, please check your email for verification instructions',
-        { keepAfterRouteChange: true }
-      );
+      .pipe(first())
+      .subscribe({
+        next: (response: any) => {
+          this.alertService.success(
+            response?.message || 'Registration successful. Please check your email to verify your account.',
+            { keepAfterRouteChange: true }
+          );
 
-      this.router.navigate(['/account/login']);
-    },
-    error: error => {
-      this.alertService.error(error);
-      this.loading = false;
-    }
-  });
+          this.router.navigate(['../login'], { relativeTo: this.route });
+        },
+        error: error => {
+          this.alertService.error(error);
+          this.loading = false;
+        }
+      });
+  }
+
+  private mustMatch(controlName: string, matchingControlName: string) {
+    return (formGroup: FormGroup) => {
+      const control = formGroup.controls[controlName];
+      const matchingControl = formGroup.controls[matchingControlName];
+
+      if (matchingControl.errors && !matchingControl.errors['mustMatch']) {
+        return;
+      }
+
+      if (control.value !== matchingControl.value) {
+        matchingControl.setErrors({ mustMatch: true });
+      } else {
+        matchingControl.setErrors(null);
+      }
+    };
   }
 }

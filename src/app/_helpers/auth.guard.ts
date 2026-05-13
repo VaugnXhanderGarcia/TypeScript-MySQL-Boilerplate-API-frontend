@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import {
-  ActivatedRouteSnapshot,
-  CanActivate,
   Router,
+  CanActivate,
+  ActivatedRouteSnapshot,
   RouterStateSnapshot
 } from '@angular/router';
 
@@ -45,15 +45,14 @@ export class AdminGuard implements CanActivate {
       this.router.navigate(['/account/login'], {
         queryParams: { returnUrl: state.url }
       });
+
       return false;
     }
 
     if (account.role !== 'Admin') {
-      this.alertService.error('Admin access only', {
-        keepAfterRouteChange: true
-      });
-
+      this.alertService.error('Admin access only');
       this.router.navigate(['/']);
+
       return false;
     }
 
