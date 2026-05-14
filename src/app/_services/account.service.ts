@@ -15,10 +15,15 @@
     public account: Observable<Account | null>;
     private refreshTokenTimeout?: any;
 
+    clearAccount() {
+  this.stopRefreshTokenTimer();
+  localStorage.removeItem('account');
+  this.accountSubject.next(null);
+}
     constructor(
-  private router: Router,
-  private http: HttpClient
-) {
+    private router: Router,
+    private http: HttpClient
+  ) {
   const storedAccount = localStorage.getItem('account');
   this.accountSubject = new BehaviorSubject<Account | null>(
     storedAccount ? JSON.parse(storedAccount) : null

@@ -38,29 +38,34 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
-    this.submitted = true;
-    this.alertService.clear();
+  this.submitted = true;
+  this.loading = false;
 
-    if (this.form.invalid) {
-      return;
-    }
+  this.alertService.clear();
 
-    this.loading = true;
-
-    this.accountService.login(this.f['email'].value, this.f['password'].value)
-      .pipe(
-        first(),
-        finalize(() => {
-          this.loading = false;
-        })
-      )
-      .subscribe({
-        next: () => {
-          this.router.navigateByUrl(this.returnUrl);
-        },
-        error: error => {
-          this.alertService.error(error);
-        }
-      });
+  if (this.form.invalid) {
+    return;
   }
+
+  this.loading = true;
+
+  this.accountService.login(this.f['email'].value, this.f['password'].value)
+    .pipe(first())
+    .subscribe({
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+        this.router.navigateByUrl(returnUrl);
+      },
+      error: error => {
+        this.loading = false;
+
+        const message =
+          error?.error?.message ||
+          error?.message ||
+          'Account does not exist, password is incorrect, or email is not yet verified.';
+
+        this.alertService.error(message);
+      }
+    });
+}
 }
