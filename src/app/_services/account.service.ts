@@ -88,16 +88,16 @@ public get accountValue(): Account | null {
     }
 
     validateResetToken(token: string) {
-      return this.http.post(`${baseUrl}/validate-reset-token`, { token });
-    }
+  return this.http.post(`${baseUrl}/validate-reset-token`, { token });
+}
 
-    resetPassword(token: string, password: string, confirmPassword: string) {
-      return this.http.post(`${baseUrl}/reset-password`, {
-        token,
-        password,
-        confirmPassword
-      });
-    }
+resetPassword(token: string, password: string, confirmPassword: string) {
+  return this.http.post(`${baseUrl}/reset-password`, {
+    token,
+    password,
+    confirmPassword
+  });
+}
 
     getAll() {
       return this.http.get<Account[]>(baseUrl, {

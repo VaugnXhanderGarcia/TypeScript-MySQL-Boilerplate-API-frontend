@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { first } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
-type TokenStatus = 'Validating' | 'Valid' | 'Invalid';
+enum TokenStatus {
+  Validating = 'Validating',
+  Valid = 'Valid',
+  Invalid = 'Invalid'
+}
 
 @Component({
   selector: 'app-reset-password',
@@ -13,9 +17,11 @@ type TokenStatus = 'Validating' | 'Valid' | 'Invalid';
   standalone: false
 })
 export class ResetPasswordComponent implements OnInit {
+  TokenStatus = TokenStatus;
+
   form!: FormGroup;
   token!: string;
-  tokenStatus: TokenStatus = 'Validating';
+  tokenStatus = TokenStatus.Validating;
   loading = false;
   submitted = false;
 
@@ -37,14 +43,20 @@ export class ResetPasswordComponent implements OnInit {
       validators: this.mustMatch('password', 'confirmPassword')
     });
 
+    if (!this.token) {
+      this.tokenStatus = TokenStatus.Invalid;
+      return;
+    }
+
     this.accountService.validateResetToken(this.token)
       .pipe(first())
       .subscribe({
         next: () => {
-          this.tokenStatus = 'Valid';
+          this.tokenStatus = TokenStatus.Valid;
         },
         error: () => {
-          this.tokenStatus = 'Invalid';
+          this.tokenStatus = TokenStatus.Invalid;
+          this.alertService.error('Reset password token is invalid or expired.');
         }
       });
   }
@@ -55,6 +67,7 @@ export class ResetPasswordComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
+
     this.alertService.clear();
 
     if (this.form.invalid) {
@@ -68,26 +81,26 @@ export class ResetPasswordComponent implements OnInit {
       this.f['password'].value,
       this.f['confirmPassword'].value
     )
-    .pipe(first())
-    .subscribe({
-      next: () => {
-        this.alertService.success('Password reset successful. You can now log in.', {
-          keepAfterRouteChange: true
-        });
+      .pipe(first())
+      .subscribe({
+        next: () => {
+          this.alertService.success('Password reset successful. You can now log in.', {
+            keepAfterRouteChange: true
+          });
 
-        this.router.navigate(['/account/login']);
-      },
-      error: error => {
-        this.loading = false;
-        this.alertService.error(error?.error?.message || error?.message || 'Password reset failed.');
-      }
-    });
+          this.router.navigate(['/account/login']);
+        },
+        error: (error) => {
+          this.alertService.error(error);
+          this.loading = false;
+        }
+      });
   }
 
   private mustMatch(controlName: string, matchingControlName: string) {
-    return (formGroup: AbstractControl) => {
-      const control = formGroup.get(controlName);
-      const matchingControl = formGroup.get(matchingControlName);
+    return (group: AbstractControl): ValidationErrors | null => {
+      const control = group.get(controlName);
+      const matchingControl = group.get(matchingControlName);
 
       if (!control || !matchingControl) {
         return null;
