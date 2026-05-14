@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AccountService, AlertService } from '../_services';
 import { first } from 'rxjs/operators';
 
-import { AccountService, AlertService } from '../_services';
-
 enum TokenStatus {
-  Validating = 'Validating',
-  Valid = 'Valid',
-  Invalid = 'Invalid'
+  Validating,
+  Valid,
+  Invalid
 }
 
 @Component({
@@ -17,11 +16,10 @@ enum TokenStatus {
   standalone: false
 })
 export class ResetPasswordComponent implements OnInit {
-  TokenStatus = TokenStatus;
-
   form!: FormGroup;
   token!: string;
   tokenStatus = TokenStatus.Validating;
+  TokenStatus = TokenStatus;
   loading = false;
   submitted = false;
 
@@ -36,12 +34,15 @@ export class ResetPasswordComponent implements OnInit {
   ngOnInit() {
     this.token = this.route.snapshot.queryParams['token'];
 
-    this.form = this.formBuilder.group({
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required]
-    }, {
-      validators: this.mustMatch('password', 'confirmPassword')
-    });
+    this.form = this.formBuilder.group(
+      {
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', Validators.required]
+      },
+      {
+        validators: this.mustMatch('password', 'confirmPassword')
+      }
+    );
 
     if (!this.token) {
       this.tokenStatus = TokenStatus.Invalid;
@@ -56,7 +57,6 @@ export class ResetPasswordComponent implements OnInit {
         },
         error: () => {
           this.tokenStatus = TokenStatus.Invalid;
-          this.alertService.error('Reset password token is invalid or expired.');
         }
       });
   }
@@ -67,7 +67,6 @@ export class ResetPasswordComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-
     this.alertService.clear();
 
     if (this.form.invalid) {
@@ -87,10 +86,9 @@ export class ResetPasswordComponent implements OnInit {
           this.alertService.success('Password reset successful. You can now log in.', {
             keepAfterRouteChange: true
           });
-
           this.router.navigate(['/account/login']);
         },
-        error: (error) => {
+        error: error => {
           this.alertService.error(error);
           this.loading = false;
         }
@@ -98,9 +96,9 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   private mustMatch(controlName: string, matchingControlName: string) {
-    return (group: AbstractControl): ValidationErrors | null => {
-      const control = group.get(controlName);
-      const matchingControl = group.get(matchingControlName);
+    return (formGroup: AbstractControl) => {
+      const control = formGroup.get(controlName);
+      const matchingControl = formGroup.get(matchingControlName);
 
       if (!control || !matchingControl) {
         return null;

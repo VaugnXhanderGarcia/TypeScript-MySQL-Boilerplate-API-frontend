@@ -2,15 +2,10 @@ import { AccountService } from '../_services';
 
 export function appInitializer(accountService: AccountService) {
   return () =>
-    new Promise<void>((resolve) => {
+    new Promise(resolve => {
       accountService.refreshToken().subscribe({
-        next: () => {
-          resolve();
-        },
-        error: () => {
-          accountService.clearAccount();
-          resolve();
-        }
+        next: () => resolve(true),
+        error: () => resolve(true)
       });
     });
 }
