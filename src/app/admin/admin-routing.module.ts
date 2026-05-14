@@ -15,7 +15,11 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', component: OverviewComponent },
-      { path: 'accounts', loadChildren: accountsModule, canActivate: [AdminGuard] }
+      {
+  path: 'accounts',
+  loadChildren: () => import('./accounts/accounts.module').then(x => x.AccountsModule),
+  canActivate: [AdminGuard]
+}
     ]
   }
 ];

@@ -16,18 +16,26 @@ export class AlertComponent implements OnInit, OnDestroy {
   constructor(private alertService: AlertService) {}
 
   ngOnInit() {
-    this.subscription = this.alertService.onAlert().subscribe(alert => {
-      if (!alert.message) {
-        this.alerts = [];
-        return;
-      }
+    this.subscription = this.alertService.onAlert()
+      .subscribe(alert => {
+        if (!alert.message) {
+          this.alerts = [];
+          return;
+        }
 
-      this.alerts = [alert];
+        const exists = this.alerts.some(x =>
+          x.message === alert.message &&
+          x.type === alert.type
+        );
 
-      setTimeout(() => {
-        this.removeAlert(alert);
-      }, 3000);
-    });
+        if (!exists) {
+          this.alerts.push(alert);
+
+          setTimeout(() => {
+            this.removeAlert(alert);
+          }, 3500);
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -41,23 +49,17 @@ export class AlertComponent implements OnInit, OnDestroy {
   cssClass(alert: Alert) {
     if (!alert) return '';
 
-    const classes = ['alert', 'alert-dismissible', 'floating-alert'];
-
     switch (alert.type) {
       case AlertType.Success:
-        classes.push('alert-success');
-        break;
+        return 'toast-alert toast-success';
       case AlertType.Error:
-        classes.push('alert-danger');
-        break;
+        return 'toast-alert toast-error';
       case AlertType.Info:
-        classes.push('alert-info');
-        break;
+        return 'toast-alert toast-info';
       case AlertType.Warning:
-        classes.push('alert-warning');
-        break;
+        return 'toast-alert toast-warning';
+      default:
+        return 'toast-alert';
     }
-
-    return classes.join(' ');
   }
 }
