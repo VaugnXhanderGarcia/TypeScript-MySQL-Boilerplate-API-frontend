@@ -1,18 +1,35 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import { AccountService } from '../_services';
 
 @Component({
-  standalone: false,
-  templateUrl: './layout.component.html'
+  selector: 'app-account-layout',
+  templateUrl: './layout.component.html',
+  standalone: false
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private accountService: AccountService
-  ) {
-    if (this.accountService.accountValue) {
+  ) {}
+
+  ngOnInit() {
+    const currentUrl = this.router.url;
+
+    const allowedPublicPages = [
+      '/account/verify-email',
+      '/account/reset-password',
+      '/account/forgot-password',
+      '/account/register'
+    ];
+
+    const isAllowedPublicPage = allowedPublicPages.some(page =>
+      currentUrl.startsWith(page)
+    );
+
+    if (this.accountService.accountValue && !isAllowedPublicPage) {
       this.router.navigate(['/']);
     }
   }
