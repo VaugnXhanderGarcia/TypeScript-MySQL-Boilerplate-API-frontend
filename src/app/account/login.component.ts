@@ -1,19 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first } from 'rxjs/operators';
+import { Router, ActivatedRoute } from '@angular/router';
+import { first, finalize } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
 @Component({
-  standalone: false,
-  templateUrl: './login.component.html'
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  standalone: false
 })
 export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
-  returnUrl!: string;
+  returnUrl = '/';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -25,7 +26,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', Validators.required],
       password: ['', Validators.required]
     });
 
@@ -36,29 +37,30 @@ export class LoginComponent implements OnInit {
     return this.form.controls;
   }
 
- onSubmit() {
-  this.submitted = true;
+  onSubmit() {
+    this.submitted = true;
+    this.alertService.clear();
 
-  this.alertService.clear();
+    if (this.form.invalid) {
+      return;
+    }
 
-  if (this.form.invalid) {
-    return;
+    this.loading = true;
+
+    this.accountService.login(this.f['email'].value, this.f['password'].value)
+      .pipe(
+        first(),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.router.navigateByUrl(this.returnUrl);
+        },
+        error: error => {
+          this.alertService.error(error);
+        }
+      });
   }
-
-  this.loading = true;
-
-  this.accountService.login(this.f['email'].value, this.f['password'].value)
-    .subscribe({
-      next: () => {
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.router.navigateByUrl(returnUrl);
-      },
-      error: error => {
-        const message = error?.error?.message || error || 'Login failed. Please try again.';
-
-        this.alertService.error(message);
-        this.loading = false;
-      }
-    });
-}
 }

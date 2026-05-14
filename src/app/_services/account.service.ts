@@ -16,18 +16,21 @@
     private refreshTokenTimeout?: any;
 
     constructor(
-      private router: Router,
-      private http: HttpClient
-    ) {
-      this.accountSubject = new BehaviorSubject<Account | null>(null);
-      this.account = this.accountSubject.asObservable();
-    }
+  private router: Router,
+  private http: HttpClient
+) {
+  const storedAccount = localStorage.getItem('account');
+  this.accountSubject = new BehaviorSubject<Account | null>(
+    storedAccount ? JSON.parse(storedAccount) : null
+  );
+  this.account = this.accountSubject.asObservable();
+}
 
-    public get accountValue(): Account | null {
-      return this.accountSubject.value;
-    }
+public get accountValue(): Account | null {
+  return this.accountSubject.value;
+}
 
-   login(email: string, password: string) {
+ login(email: string, password: string) {
   return this.http.post<Account>(
     `${baseUrl}/authenticate`,
     { email, password },
@@ -35,12 +38,12 @@
   ).pipe(
     map(account => {
       this.accountSubject.next(account);
+      localStorage.setItem('account', JSON.stringify(account));
       this.startRefreshTokenTimer();
       return account;
     })
   );
 }
-
    logout() {
     this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true })
         .subscribe({
@@ -53,7 +56,7 @@
     this.router.navigate(['/account/login']);
 }
 
-    refreshToken() {
+  refreshToken() {
   return this.http.post<Account>(
     `${baseUrl}/refresh-token`,
     {},
@@ -61,12 +64,12 @@
   ).pipe(
     map(account => {
       this.accountSubject.next(account);
+      localStorage.setItem('account', JSON.stringify(account));
       this.startRefreshTokenTimer();
       return account;
     })
   );
 }
-
     register(account: any) {
       return this.http.post(`${baseUrl}/register`, account);
     }

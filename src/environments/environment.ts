@@ -1,5 +1,4 @@
 export const environment = {
-  production: true,
-  apiUrl: 'https://angular-auth-final.onrender.com',
-  useFakeBackend: false
+  production: false,
+  apiUrl: 'http://localhost:4000'
 };
