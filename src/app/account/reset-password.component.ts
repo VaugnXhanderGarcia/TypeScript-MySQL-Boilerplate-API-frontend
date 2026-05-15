@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AccountService, AlertService } from '../_services';
 
 enum TokenStatus {
-  Validating = 'Validating',
-  Valid = 'Valid',
-  Invalid = 'Invalid'
+  Validating,
+  Valid,
+  Invalid
 }
 
 @Component({
@@ -16,10 +16,10 @@ enum TokenStatus {
   standalone: false
 })
 export class ResetPasswordComponent implements OnInit {
-  form!: FormGroup;
-  token!: string;
-  tokenStatus = TokenStatus.Validating;
   TokenStatus = TokenStatus;
+  tokenStatus = TokenStatus.Validating;
+  token = '';
+  form!: FormGroup;
   loading = false;
   submitted = false;
 
@@ -32,18 +32,20 @@ export class ResetPasswordComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.form = this.formBuilder.group({
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required]
-    }, {
-      validators: this.mustMatch('password', 'confirmPassword')
-    });
+    this.token = this.route.snapshot.queryParams['token'];
 
-    this.token = this.route.snapshot.queryParamMap.get('token') || '';
+    this.form = this.formBuilder.group(
+      {
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', Validators.required]
+      },
+      {
+        validators: this.mustMatch('password', 'confirmPassword')
+      }
+    );
 
     if (!this.token) {
       this.tokenStatus = TokenStatus.Invalid;
-      this.alertService.error('Reset token is missing.');
       return;
     }
 
@@ -53,7 +55,7 @@ export class ResetPasswordComponent implements OnInit {
       },
       error: () => {
         this.tokenStatus = TokenStatus.Invalid;
-        this.alertService.error('Reset token is invalid or expired.');
+        this.alertService.error('Reset password token is invalid or expired.');
       }
     });
   }
@@ -64,7 +66,7 @@ export class ResetPasswordComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-    this.alertService.clear?.();
+    this.alertService.clear();
 
     if (this.form.invalid) {
       return;
@@ -72,32 +74,37 @@ export class ResetPasswordComponent implements OnInit {
 
     this.loading = true;
 
-    this.accountService.resetPassword({
-      token: this.token,
-      password: this.f['password'].value,
-      confirmPassword: this.f['confirmPassword'].value
-    }).subscribe({
-      next: () => {
-        this.alertService.success('Password reset successful. You can now login.', {
-          keepAfterRouteChange: true
-        });
-
-        this.router.navigate(['/account/login']);
-      },
-      error: error => {
-        this.alertService.error(error);
-        this.loading = false;
-      }
-    });
+    this.accountService
+      .resetPassword(
+        this.token,
+        this.f['password'].value,
+        this.f['confirmPassword'].value
+      )
+      .subscribe({
+        next: () => {
+          this.alertService.success('Password reset successful. You can now log in.', {
+            keepAfterRouteChange: true
+          });
+          this.router.navigate(['/account/login']);
+        },
+        error: error => {
+          this.alertService.error(error);
+          this.loading = false;
+        }
+      });
   }
 
   private mustMatch(controlName: string, matchingControlName: string) {
-    return (formGroup: FormGroup) => {
-      const control = formGroup.controls[controlName];
-      const matchingControl = formGroup.controls[matchingControlName];
+    return (formGroup: AbstractControl) => {
+      const control = formGroup.get(controlName);
+      const matchingControl = formGroup.get(matchingControlName);
+
+      if (!control || !matchingControl) {
+        return null;
+      }
 
       if (matchingControl.errors && !matchingControl.errors['mustMatch']) {
-        return;
+        return null;
       }
 
       if (control.value !== matchingControl.value) {
@@ -105,6 +112,8 @@ export class ResetPasswordComponent implements OnInit {
       } else {
         matchingControl.setErrors(null);
       }
+
+      return null;
     };
   }
 }
