@@ -1,7 +1,4 @@
 import { Component } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
-
 import { AccountService } from './_services';
 import { Account } from './_models';
 
@@ -11,20 +8,10 @@ import { Account } from './_models';
   standalone: false
 })
 export class AppComponent {
-  account: Account | null = null;
-  showNavbar = true;
+  account?: Account | null;
 
-  constructor(
-    private accountService: AccountService,
-    private router: Router
-  ) {
+  constructor(private accountService: AccountService) {
     this.accountService.account.subscribe(x => this.account = x);
-
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
-        this.showNavbar = !event.url.includes('/account/');
-      });
   }
 
   logout() {
