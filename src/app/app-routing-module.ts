@@ -2,11 +2,16 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AuthGuard } from './_helpers';
-import { HomeComponent } from './home';
+import { HomeComponent } from './home/home.component';
 
-const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
-const profileModule = () => import('./profile/profile.module').then(x => x.ProfileModule);
-const adminModule = () => import('./admin/admin.module').then(x => x.AdminModule);
+const accountModule = () =>
+  import('./account/account.module').then(x => x.AccountModule);
+
+const profileModule = () =>
+  import('./profile/profile.module').then(x => x.ProfileModule);
+
+const adminModule = () =>
+  import('./admin/admin.module').then(x => x.AdminModule);
 
 const routes: Routes = [
   {
@@ -26,8 +31,7 @@ const routes: Routes = [
   {
     path: 'admin',
     loadChildren: adminModule,
-    canActivate: [AuthGuard],
-    data: { roles: ['Admin'] }
+    canActivate: [AuthGuard]
   },
   {
     path: '**',

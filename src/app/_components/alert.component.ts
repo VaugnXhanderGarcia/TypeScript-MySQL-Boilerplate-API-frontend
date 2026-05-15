@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { Alert, AlertType } from '../_models';
@@ -6,40 +6,32 @@ import { AlertService } from '../_services';
 
 @Component({
   selector: 'app-alert',
-  templateUrl: './alert.component.html',
-  standalone: false
+  standalone: false,
+  templateUrl: './alert.component.html'
 })
 export class AlertComponent implements OnInit, OnDestroy {
   alerts: Alert[] = [];
-  private subscription?: Subscription;
+  private subscription!: Subscription;
 
   constructor(private alertService: AlertService) {}
 
   ngOnInit() {
-    this.subscription = this.alertService.onAlert()
-      .subscribe(alert => {
-        if (!alert.message) {
-          this.alerts = [];
-          return;
-        }
+    this.subscription = this.alertService.onAlert().subscribe(alert => {
+      if (!alert.message) {
+        this.alerts = [];
+        return;
+      }
 
-        const exists = this.alerts.some(x =>
-          x.message === alert.message &&
-          x.type === alert.type
-        );
+      this.alerts.push(alert);
 
-        if (!exists) {
-          this.alerts.push(alert);
-
-          setTimeout(() => {
-            this.removeAlert(alert);
-          }, 3500);
-        }
-      });
+      setTimeout(() => {
+        this.removeAlert(alert);
+      }, 3000);
+    });
   }
 
   ngOnDestroy() {
-    this.subscription?.unsubscribe();
+    this.subscription.unsubscribe();
   }
 
   removeAlert(alert: Alert) {
@@ -47,19 +39,27 @@ export class AlertComponent implements OnInit, OnDestroy {
   }
 
   cssClass(alert: Alert) {
-    if (!alert) return '';
+    if (!alert) {
+      return;
+    }
+
+    const classes = ['alert', 'alert-dismissible', 'fade', 'show', 'shadow'];
 
     switch (alert.type) {
       case AlertType.Success:
-        return 'toast-alert toast-success';
+        classes.push('alert-success');
+        break;
       case AlertType.Error:
-        return 'toast-alert toast-error';
+        classes.push('alert-danger');
+        break;
       case AlertType.Info:
-        return 'toast-alert toast-info';
+        classes.push('alert-info');
+        break;
       case AlertType.Warning:
-        return 'toast-alert toast-warning';
-      default:
-        return 'toast-alert';
+        classes.push('alert-warning');
+        break;
     }
+
+    return classes.join(' ');
   }
 }

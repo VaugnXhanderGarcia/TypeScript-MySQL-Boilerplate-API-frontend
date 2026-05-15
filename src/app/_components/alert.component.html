@@ -1,9 +1,6 @@
-<div class="toast-container">
+<div class="position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 9999; min-width: 320px; max-width: 600px;">
   <div *ngFor="let alert of alerts" [ngClass]="cssClass(alert)">
-    <span>{{ alert.message }}</span>
-
-    <button type="button" class="toast-close" (click)="removeAlert(alert)">
-      ×
-    </button>
+    {{ alert.message }}
+    <button type="button" class="btn-close" (click)="removeAlert(alert)"></button>
   </div>
 </div>
