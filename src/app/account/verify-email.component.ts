@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-
-import { AccountService } from '../_services';
-import { AlertService } from '../_services';
+import { AccountService, AlertService } from '../_services';
 
 @Component({
   selector: 'app-verify-email',
@@ -11,6 +9,8 @@ import { AlertService } from '../_services';
 })
 export class VerifyEmailComponent implements OnInit {
   verifying = true;
+  verified = false;
+  failed = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -20,37 +20,36 @@ export class VerifyEmailComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    localStorage.removeItem('account');
-
     const token = this.route.snapshot.queryParams['token'];
 
     if (!token) {
-      this.alertService.error('Verification token is missing.', {
-        keepAfterRouteChange: true
-      });
-
-      this.router.navigate(['/account/login']);
+      this.verifying = false;
+      this.failed = true;
+      this.alertService.error('Verification token is missing.');
       return;
     }
 
     this.accountService.verifyEmail(token).subscribe({
       next: () => {
         this.verifying = false;
+        this.verified = true;
 
-        this.alertService.success('Email verified successfully. You can now log in.', {
-          keepAfterRouteChange: true
-        });
+        this.alertService.success('Email verified successfully. You can now log in.');
 
-        this.router.navigate(['/account/login']);
+        setTimeout(() => {
+          this.router.navigate(['/account/login']);
+        }, 2000);
       },
-      error: error => {
+      error: (error) => {
         this.verifying = false;
+        this.failed = true;
 
-        this.alertService.error(error || 'Email verification failed.', {
-          keepAfterRouteChange: true
-        });
+        const message =
+          error?.error?.message ||
+          error?.message ||
+          'Email verification failed. The token may be invalid or expired.';
 
-        this.router.navigate(['/account/login']);
+        this.alertService.error(message);
       }
     });
   }
