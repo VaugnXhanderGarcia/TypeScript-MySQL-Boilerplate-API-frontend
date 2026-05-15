@@ -12,7 +12,8 @@ import { AccountService, AlertService } from '../_services';
 export class AuthGuard implements CanActivate {
   constructor(
     private router: Router,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private alertService: AlertService
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
@@ -52,9 +53,12 @@ export class AdminGuard implements CanActivate {
       return true;
     }
 
-    this.alertService.error('Admin access only.');
-    this.router.navigate(['/']);
+    this.alertService.error('Admin access only. You are not allowed to open the Accounts section.', {
+      autoClose: true,
+      keepAfterRouteChange: false
+    });
 
+    this.router.navigate(['/']);
     return false;
   }
 }

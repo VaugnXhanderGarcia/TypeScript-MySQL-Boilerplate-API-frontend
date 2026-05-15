@@ -1,13 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { AdminGuard } from '../../_helpers';
+import { LayoutComponent } from '../layout.component';
 import { ListComponent } from './list.component';
 import { AddEditComponent } from './add-edit.component';
+import { AdminGuard } from '../../_helpers';
 
 const routes: Routes = [
   {
     path: '',
+    component: LayoutComponent,
     canActivate: [AdminGuard],
     children: [
       {

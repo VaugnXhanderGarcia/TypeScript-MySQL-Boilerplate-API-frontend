@@ -1,25 +1,42 @@
 <nav class="navbar navbar-expand navbar-dark bg-dark px-3" *ngIf="account">
-  <div class="navbar-nav">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item nav-link">
+  <div class="navbar-nav me-auto">
+    <a
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item nav-link">
       Home
     </a>
 
-    <a routerLink="/profile" routerLinkActive="active" class="nav-item nav-link">
+    <a
+      routerLink="/profile"
+      routerLinkActive="active"
+      class="nav-item nav-link">
       Profile
     </a>
 
-    <a routerLink="/admin/accounts" routerLinkActive="active" class="nav-item nav-link">
+    <a
+      routerLink="/admin/accounts"
+      routerLinkActive="active"
+      class="nav-item nav-link">
       Accounts
     </a>
+  </div>
 
-    <a href="#" class="nav-item nav-link" (click)="logout($event)">
+  <div class="navbar-nav ms-auto align-items-center">
+    <span class="navbar-text text-white me-3">
+      {{ account.firstName }} {{ account.lastName }}
+      <span class="badge bg-secondary ms-1">{{ account.role }}</span>
+    </span>
+
+    <button type="button" class="btn btn-outline-light btn-sm" (click)="logout()">
       Logout
-    </a>
+    </button>
   </div>
 </nav>
 
 <app-alert></app-alert>
 
-<div class="container pt-4">
+<div class="container mt-4">
   <router-outlet></router-outlet>
 </div>
