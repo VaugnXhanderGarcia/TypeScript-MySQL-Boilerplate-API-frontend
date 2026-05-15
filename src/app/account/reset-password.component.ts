@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AccountService, AlertService } from '../_services';
+import { MustMatch } from '../_helpers';
 
 enum TokenStatus {
   Validating,
@@ -11,15 +12,14 @@ enum TokenStatus {
 }
 
 @Component({
-  selector: 'app-reset-password',
-  templateUrl: './reset-password.component.html',
-  standalone: false
+  standalone: false,
+  templateUrl: './reset-password.component.html'
 })
 export class ResetPasswordComponent implements OnInit {
   TokenStatus = TokenStatus;
   tokenStatus = TokenStatus.Validating;
-  token = '';
   form!: FormGroup;
+  token!: string;
   loading = false;
   submitted = false;
 
@@ -34,20 +34,12 @@ export class ResetPasswordComponent implements OnInit {
   ngOnInit() {
     this.token = this.route.snapshot.queryParams['token'];
 
-    this.form = this.formBuilder.group(
-      {
-        password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', Validators.required]
-      },
-      {
-        validators: this.mustMatch('password', 'confirmPassword')
-      }
-    );
-
-    if (!this.token) {
-      this.tokenStatus = TokenStatus.Invalid;
-      return;
-    }
+    this.form = this.formBuilder.group({
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required]
+    }, {
+      validators: MustMatch('password', 'confirmPassword')
+    });
 
     this.accountService.validateResetToken(this.token).subscribe({
       next: () => {
@@ -55,7 +47,6 @@ export class ResetPasswordComponent implements OnInit {
       },
       error: () => {
         this.tokenStatus = TokenStatus.Invalid;
-        this.alertService.error('Reset password token is invalid or expired.');
       }
     });
   }
@@ -74,46 +65,21 @@ export class ResetPasswordComponent implements OnInit {
 
     this.loading = true;
 
-    this.accountService
-      .resetPassword(
-        this.token,
-        this.f['password'].value,
-        this.f['confirmPassword'].value
-      )
-      .subscribe({
-        next: () => {
-          this.alertService.success('Password reset successful. You can now log in.', {
-            keepAfterRouteChange: true
-          });
-          this.router.navigate(['/account/login']);
-        },
-        error: error => {
-          this.alertService.error(error);
-          this.loading = false;
-        }
-      });
-  }
-
-  private mustMatch(controlName: string, matchingControlName: string) {
-    return (formGroup: AbstractControl) => {
-      const control = formGroup.get(controlName);
-      const matchingControl = formGroup.get(matchingControlName);
-
-      if (!control || !matchingControl) {
-        return null;
+    this.accountService.resetPassword(
+      this.token,
+      this.f['password'].value,
+      this.f['confirmPassword'].value
+    ).subscribe({
+      next: () => {
+        this.alertService.success('Password reset successful. You can now login.', {
+          keepAfterRouteChange: true
+        });
+        this.router.navigate(['/account/login']);
+      },
+      error: error => {
+        this.alertService.error(error);
+        this.loading = false;
       }
-
-      if (matchingControl.errors && !matchingControl.errors['mustMatch']) {
-        return null;
-      }
-
-      if (control.value !== matchingControl.value) {
-        matchingControl.setErrors({ mustMatch: true });
-      } else {
-        matchingControl.setErrors(null);
-      }
-
-      return null;
-    };
+    });
   }
 }

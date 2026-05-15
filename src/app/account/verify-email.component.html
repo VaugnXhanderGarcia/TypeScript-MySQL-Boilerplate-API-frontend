@@ -4,17 +4,16 @@
   </div>
 
   <div class="card-body">
-    <div *ngIf="verifying" class="text-center py-4">
-      <div class="spinner-border spinner-border-sm me-2"></div>
+    <div *ngIf="tokenStatus === 'validating'">
       Verifying your email address...
     </div>
 
-    <div *ngIf="verified" class="alert alert-success mb-0">
-      Email verified successfully. Redirecting you to the login page...
+    <div *ngIf="tokenStatus === 'verified'" class="text-success">
+      Email verified successfully. Redirecting to login...
     </div>
 
-    <div *ngIf="failed" class="alert alert-danger mb-0">
-      Email verification failed. Please check your verification link or request a new one.
+    <div *ngIf="tokenStatus === 'invalid'" class="text-danger">
+      Email verification failed. Please try registering again.
     </div>
   </div>
 </div>
