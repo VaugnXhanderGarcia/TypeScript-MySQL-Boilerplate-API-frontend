@@ -50,41 +50,27 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
-    this.submitted = true;
+  this.submitted = true;
 
-    this.alertService.clear();
+  if (this.form.invalid) {
+    return;
+  }
 
-    if (this.form.invalid) {
-      return;
-    }
+  this.loading = true;
 
-    this.loading = true;
-
-    const params = {
-      title: this.form.value.title,
-      firstName: this.form.value.firstName,
-      lastName: this.form.value.lastName,
-      email: this.form.value.email,
-      password: this.form.value.password,
-      confirmPassword: this.form.value.confirmPassword,
-      acceptTerms: this.form.value.acceptTerms
-    };
-
-    this.accountService.register(params).subscribe({
+  this.accountService.register(this.form.value)
+    .subscribe({
       next: () => {
-        this.alertService.success(
-          'Registration successful. Please check your email to verify your account.',
-          { keepAfterRouteChange: true }
-        );
-
-        this.router.navigate(['/account/login']);
-      },
+        this.alertService.success('Registration successful. Please check your email.', {
+          keepAfterRouteChange: true
+        });
+this.router.navigate(['/account/login']);      },
       error: error => {
         this.alertService.error(error);
         this.loading = false;
       }
     });
-  }
+}
 
   private mustMatch(controlName: string, matchingControlName: string): ValidatorFn {
     return (formGroup: AbstractControl): ValidationErrors | null => {
