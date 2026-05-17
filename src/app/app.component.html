@@ -16,11 +16,12 @@
     </a>
 
     <a
-      routerLink="/admin/accounts"
-      routerLinkActive="active"
-      class="nav-item nav-link">
-      Accounts
-    </a>
+  *ngIf="account.role === 'Admin'"
+  routerLink="/admin"
+  routerLinkActive="active"
+  class="nav-item nav-link">
+  Admin
+</a>
   </div>
 
   <div class="navbar-nav ms-auto align-items-center">

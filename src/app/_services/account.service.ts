@@ -146,9 +146,13 @@ export class AccountService {
     const expires = new Date(jwtToken.exp * 1000);
     const timeout = expires.getTime() - Date.now() - 60 * 1000;
 
-    this.refreshTokenTimeout = setTimeout(() => {
-      this.refreshToken().subscribe();
-    }, timeout);
+if (timeout <= 0) {
+  return;
+}
+
+this.refreshTokenTimeout = setTimeout(() => {
+  this.refreshToken().subscribe({ error: () => this.logout() });
+}, timeout);
   }
 
   private stopRefreshTokenTimer() {

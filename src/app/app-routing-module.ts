@@ -13,9 +13,6 @@ const profileModule = () =>
 const adminModule = () =>
   import('./admin/admin.module').then(x => x.AdminModule);
 
-const accountsModule = () =>
-  import('./admin/accounts/accounts.module').then(x => x.AccountsModule);
-
 const routes: Routes = [
   {
     path: '',
@@ -34,11 +31,6 @@ const routes: Routes = [
   {
     path: 'admin',
     loadChildren: adminModule,
-    canActivate: [AuthGuard]
-  },
-  {
-    path: 'admin/accounts',
-    loadChildren: accountsModule,
     canActivate: [AuthGuard, AdminGuard]
   },
   {
