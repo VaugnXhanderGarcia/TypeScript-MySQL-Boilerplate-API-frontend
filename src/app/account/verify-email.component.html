@@ -1,19 +1,13 @@
-<div class="card">
-  <div class="card-header">
-    <h4 class="mb-0">Verify Email</h4>
+<div class="container mt-5" style="max-width: 500px;">
+  <div *ngIf="loading" class="alert alert-info">
+    Verifying your email...
   </div>
 
-  <div class="card-body">
-    <div *ngIf="tokenStatus === 'validating'">
-      Verifying your email address...
-    </div>
+  <div *ngIf="verified" class="alert alert-success">
+    Email verified successfully. You can now log in.
+  </div>
 
-    <div *ngIf="tokenStatus === 'verified'" class="text-success">
-      Email verified successfully. Redirecting to login...
-    </div>
-
-    <div *ngIf="tokenStatus === 'invalid'" class="text-danger">
-      Email verification failed. Please try registering again.
-    </div>
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
   </div>
 </div>
