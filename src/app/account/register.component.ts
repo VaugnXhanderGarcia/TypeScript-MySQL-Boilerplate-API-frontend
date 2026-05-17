@@ -52,6 +52,8 @@ export class RegisterComponent implements OnInit {
   onSubmit() {
   this.submitted = true;
 
+  this.alertService.clear();
+
   if (this.form.invalid) {
     return;
   }
@@ -61,9 +63,11 @@ export class RegisterComponent implements OnInit {
   this.accountService.register(this.form.value)
     .subscribe({
       next: () => {
-        this.alertService.success('Registration successful. Please check your email.', {
-          keepAfterRouteChange: true
-        });
+        this.alertService.success(
+          'Registration successful, please check your email for verification instructions',
+          { keepAfterRouteChange: true }
+        );
+
 this.router.navigate(['/account/login']);      },
       error: error => {
         this.alertService.error(error);

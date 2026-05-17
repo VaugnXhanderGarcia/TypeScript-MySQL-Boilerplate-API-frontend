@@ -30,7 +30,7 @@ export class ForgotPasswordComponent implements OnInit {
     return this.form.controls;
   }
 
-  onSubmit() {
+ onSubmit() {
   this.submitted = true;
 
   this.alertService.clear();
@@ -41,20 +41,19 @@ export class ForgotPasswordComponent implements OnInit {
 
   this.loading = true;
 
-  this.accountService.forgotPassword(this.f['email'].value)
+  this.accountService.forgotPassword(this.form.value.email)
     .subscribe({
       next: () => {
         this.alertService.success(
-          'Password reset email sent. Please check your email.',
-          { keepAfterRouteChange: true }
+          'Please check your email for password reset instructions'
         );
-
-        this.router.navigate(['/account/login']);
+        this.loading = false;
       },
       error: error => {
-        this.alertService.error(error?.error?.message || error || 'Unable to send reset email.');
+        this.alertService.error(error);
         this.loading = false;
       }
     });
+
 }
 }
