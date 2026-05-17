@@ -16,7 +16,7 @@ const adminModule = () =>
 const routes: Routes = [
   {
     path: '',
-    component: HomeComponent,
+    component: HomeComponent, 
     canActivate: [AuthGuard]
   },
   {

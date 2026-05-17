@@ -42,6 +42,7 @@ export class AdminGuard implements CanActivate {
 
     this.alertService.error('Admin access only.');
     this.router.navigate(['/']);
+
     return false;
   }
 }
