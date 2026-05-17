@@ -1,13 +1,19 @@
 <div class="container mt-5" style="max-width: 500px;">
-  <div *ngIf="loading" class="alert alert-info">
-    Verifying your email...
-  </div>
+  @if (loading) {
+    <div class="alert alert-info">
+      Verifying your email...
+    </div>
+  }
 
-  <div *ngIf="verified" class="alert alert-success">
-    Email verified successfully. You can now log in.
-  </div>
+  @if (verified) {
+    <div class="alert alert-success">
+      Email verified successfully. You can now log in.
+    </div>
+  }
 
-  <div *ngIf="error" class="alert alert-danger">
-    {{ error }}
-  </div>
+  @if (error) {
+    <div class="alert alert-danger">
+      {{ error }}
+    </div>
+  }
 </div>

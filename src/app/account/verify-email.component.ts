@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../_services/account.service';
 
 @Component({
+  selector: 'app-verify-email',
   templateUrl: './verify-email.component.html'
 })
 export class VerifyEmailComponent implements OnInit {
@@ -37,7 +38,10 @@ export class VerifyEmailComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.error = err?.error?.message || err?.message || 'Verification failed.';
+        this.error =
+          err?.error?.message ||
+          err?.message ||
+          'Verification failed.';
       }
     });
   }
