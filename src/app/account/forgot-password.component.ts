@@ -45,9 +45,13 @@ export class ForgotPasswordComponent implements OnInit {
     .subscribe({
       next: () => {
         this.alertService.success(
-          'Please check your email for password reset instructions'
+          'Please check your email for password reset instructions',
+          { keepAfterRouteChange: true }
         );
         this.loading = false;
+        setTimeout(() => {
+          this.router.navigate(['/account/login']);
+        }, 2000);
       },
       error: error => {
         this.alertService.error(error);
