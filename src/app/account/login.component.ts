@@ -1,20 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
-import { first, finalize } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { AccountService, AlertService } from '../_services';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  standalone: false
+  standalone: false,
+  templateUrl: './login.component.html'
 })
 export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
-  returnUrl = '/';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -22,15 +20,17 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private accountService: AccountService,
     private alertService: AlertService
-  ) {}
+  ) {
+    if (this.accountService.accountValue) {
+      this.router.navigate(['/']);
+    }
+  }
 
   ngOnInit() {
     this.form = this.formBuilder.group({
-      email: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
-
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
   get f() {
@@ -38,29 +38,33 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
-  this.submitted = true;
+    this.submitted = true;
+    this.alertService.clear();
 
-  this.alertService.clear();
+    if (this.form.invalid) {
+      return;
+    }
 
-  if (this.form.invalid) {
-    return;
-  }
+    this.loading = true;
 
-  this.loading = true;
-
-  this.accountService.login(
-    this.f['email'].value,
-    this.f['password'].value
-  )
-    .subscribe({
+    this.accountService.login(
+      this.f['email'].value,
+      this.f['password'].value
+    ).subscribe({
       next: () => {
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
         this.router.navigateByUrl(returnUrl);
       },
       error: error => {
-        this.alertService.error(error || 'Email or password is incorrect');
+        const message =
+          error?.error?.message ||
+          error?.message ||
+          error ||
+          'Email or password is incorrect';
+
+        this.alertService.error(message);
         this.loading = false;
       }
     });
-}
+  }
 }
