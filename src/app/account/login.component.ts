@@ -60,19 +60,19 @@ export class LoginComponent implements OnInit {
         this.router.navigateByUrl(returnUrl);
       },
       error: error => {
-        const message =
-          error?.error?.message ||
-          error?.message ||
-          error ||
-          'Email or password is incorrect';
+  const message =
+    error?.error?.message ||
+    error?.message ||
+    error ||
+    'Login failed';
 
-        this.errorMessage = message;
-        this.alertService.error(message);
-        this.loading = false;
-      },
-      complete: () => {
-        this.loading = false;
-      }
+  this.errorMessage = message;
+  this.alertService.error(message);
+  this.loading = false;
+},
+complete: () => {
+  this.loading = false;
+}
     });
   }
 }
