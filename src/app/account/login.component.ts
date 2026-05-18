@@ -39,7 +39,6 @@ export class LoginComponent implements OnInit {
 
   onSubmit() {
   this.submitted = true;
-  this.loading = false;
 
   this.alertService.clear();
 
@@ -49,22 +48,18 @@ export class LoginComponent implements OnInit {
 
   this.loading = true;
 
-  this.accountService.login(this.f['email'].value, this.f['password'].value)
-    .pipe(first())
+  this.accountService.login(
+    this.f['email'].value,
+    this.f['password'].value
+  )
     .subscribe({
       next: () => {
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
         this.router.navigateByUrl(returnUrl);
       },
       error: error => {
+        this.alertService.error(error || 'Email or password is incorrect');
         this.loading = false;
-
-        const message =
-          error?.error?.message ||
-          error?.message ||
-          'Account does not exist, password is incorrect, or email is not yet verified.';
-
-        this.alertService.error(message);
       }
     });
 }

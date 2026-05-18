@@ -3,41 +3,29 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpInterceptor,
-  HttpErrorResponse
+  HttpInterceptor
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { AccountService, AlertService } from '../_services';
+import { AccountService } from '../_services';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  constructor(
-    private accountService: AccountService,
-    private alertService: AlertService
-  ) {}
+  constructor(private accountService: AccountService) {}
 
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(
+    request: HttpRequest<any>,
+    next: HttpHandler
+  ): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        const isRefreshTokenRequest = request.url.includes('/accounts/refresh-token');
-
-        if (isRefreshTokenRequest) {
-          return throwError(() => error);
-        }
-
-        if (error.status === 401) {
+      catchError(err => {
+        if ([401, 403].includes(err.status) && this.accountService.accountValue) {
           this.accountService.logout();
         }
 
-        const message =
-          error.error?.message ||
-          error.error?.title ||
-          error.message ||
-          'Something went wrong';
-
-        return throwError(() => message);
+        const error = err.error?.message || err.statusText || 'Something went wrong';
+        return throwError(() => error);
       })
     );
   }
