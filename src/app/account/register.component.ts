@@ -20,6 +20,7 @@ export class RegisterComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
+  errorMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -51,7 +52,7 @@ export class RegisterComponent implements OnInit {
 
   onSubmit() {
   this.submitted = true;
-
+  this.errorMessage = '';
   this.alertService.clear();
 
   if (this.form.invalid) {
@@ -63,14 +64,27 @@ export class RegisterComponent implements OnInit {
   this.accountService.register(this.form.value)
     .subscribe({
       next: () => {
+        this.loading = false;
+
         this.alertService.success(
           'Registration successful, please check your email for verification instructions',
           { keepAfterRouteChange: true }
         );
 
-this.router.navigate(['/account/login']);      },
+        this.router.navigate(['/account/login']);
+      },
       error: error => {
-        this.alertService.error(error);
+        const message =
+          error?.error?.message ||
+          error?.message ||
+          error ||
+          'Registration failed';
+
+        this.errorMessage = message;
+        this.alertService.error(message);
+        this.loading = false;
+      },
+      complete: () => {
         this.loading = false;
       }
     });

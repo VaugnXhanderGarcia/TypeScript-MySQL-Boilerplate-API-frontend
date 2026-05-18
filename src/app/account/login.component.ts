@@ -13,6 +13,7 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
+  errorMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -39,6 +40,8 @@ export class LoginComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
+    this.loading = false;
+    this.errorMessage = '';
     this.alertService.clear();
 
     if (this.form.invalid) {
@@ -52,6 +55,7 @@ export class LoginComponent implements OnInit {
       this.f['password'].value
     ).subscribe({
       next: () => {
+        this.loading = false;
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
         this.router.navigateByUrl(returnUrl);
       },
@@ -62,7 +66,11 @@ export class LoginComponent implements OnInit {
           error ||
           'Email or password is incorrect';
 
+        this.errorMessage = message;
         this.alertService.error(message);
+        this.loading = false;
+      },
+      complete: () => {
         this.loading = false;
       }
     });

@@ -4,6 +4,10 @@
       <div class="card-body p-4">
         <h3 class="card-title mb-4 text-center">Register</h3>
 
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           <div class="row">
             <div class="col-md-4 mb-3">
