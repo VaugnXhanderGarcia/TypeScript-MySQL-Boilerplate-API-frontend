@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { timeout } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 import { MustMatch } from '../_helpers';
@@ -34,6 +35,11 @@ export class ResetPasswordComponent implements OnInit {
   ngOnInit() {
     this.token = this.route.snapshot.queryParams['token'];
 
+    if (!this.token) {
+      this.tokenStatus = TokenStatus.Invalid;
+      return;
+    }
+
     this.form = this.formBuilder.group({
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required]
@@ -41,11 +47,15 @@ export class ResetPasswordComponent implements OnInit {
       validators: MustMatch('password', 'confirmPassword')
     });
 
-    this.accountService.validateResetToken(this.token).subscribe({
-      next: () => {
+    this.accountService.validateResetToken(this.token).pipe(
+      timeout(10000)
+    ).subscribe({
+      next: (response) => {
+        console.log('Token validation successful:', response);
         this.tokenStatus = TokenStatus.Valid;
       },
-      error: () => {
+      error: (error) => {
+        console.error('Token validation failed:', error);
         this.tokenStatus = TokenStatus.Invalid;
       }
     });
