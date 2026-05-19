@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AccountService } from '../_services/account.service';
+import { ActivatedRoute } from '@angular/router';
+
+import { AccountService } from '../_services';
 
 @Component({
   selector: 'app-verify-email',
@@ -8,42 +9,40 @@ import { AccountService } from '../_services/account.service';
   templateUrl: './verify-email.component.html'
 })
 export class VerifyEmailComponent implements OnInit {
-  loading = false;
-  verified = false;
-  error = '';
+  verifying = true;
+  successMessage = '';
+  errorMessage = '';
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private accountService: AccountService
   ) {}
 
   ngOnInit() {
-    const token = this.route.snapshot.queryParams['token'];
+    const token = this.route.snapshot.queryParamMap.get('token');
 
     if (!token) {
-      this.error = 'Verification token is missing.';
+      this.verifying = false;
+      this.errorMessage = 'Verification token is missing.';
       return;
     }
 
-    this.loading = true;
-
-    this.accountService.verifyEmail(token).subscribe({
-      next: () => {
-        this.loading = false;
-        this.verified = true;
-
-        setTimeout(() => {
-          this.router.navigate(['/account/login']);
-        }, 2000);
-      },
-      error: (err) => {
-        this.loading = false;
-        this.error =
-          err?.error?.message ||
-          err?.message ||
-          'Verification failed.';
-      }
-    });
+    this.accountService.verifyEmail(token)
+      .subscribe({
+        next: (response: any) => {
+          this.verifying = false;
+          this.successMessage =
+            response?.message ||
+            'Email verified successfully. You can now log in.';
+        },
+        error: error => {
+          this.verifying = false;
+          this.errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            error ||
+            'Email verification failed.';
+        }
+      });
   }
 }

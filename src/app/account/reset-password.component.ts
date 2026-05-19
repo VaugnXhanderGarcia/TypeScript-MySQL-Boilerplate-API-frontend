@@ -1,61 +1,66 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { AccountService, AlertService } from '../_services';
-import { MustMatch } from '../_helpers';
 
 @Component({
+  selector: 'app-reset-password',
   standalone: false,
   templateUrl: './reset-password.component.html'
 })
 export class ResetPasswordComponent implements OnInit {
   form!: FormGroup;
-  token: string = '';
-  loading = false;
-  submitted = false;
+  token = '';
+
   validating = true;
-  tokenValid = false;
+  validToken = false;
+  submitted = false;
+  loading = false;
+
+  errorMessage = '';
+  successMessage = '';
 
   constructor(
-    private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
+    private formBuilder: FormBuilder,
     private accountService: AccountService,
     private alertService: AlertService
-  ) {
-    this.initForm();
-  }
+  ) {}
 
   ngOnInit() {
-    this.token = this.route.snapshot.queryParams['token'];
+    this.token = this.route.snapshot.queryParamMap.get('token') || '';
 
-    if (!this.token) {
-      this.validating = false;
-      this.tokenValid = false;
-      return;
-    }
-
-    this.accountService.validateResetToken(this.token).subscribe({
-      next: () => {
-        this.tokenValid = true;
-        this.validating = false;
-      },
-      error: () => {
-        this.tokenValid = false;
-        this.validating = false;
-        this.alertService.error('Invalid or expired reset link');
-      }
-    });
-  }
-
-  initForm() {
     this.form = this.formBuilder.group({
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required]
-    }, {
-      validators: MustMatch('password', 'confirmPassword')
     });
+
+    if (!this.token) {
+      this.validating = false;
+      this.validToken = false;
+      this.errorMessage = 'Reset token is missing.';
+      return;
+    }
+
+    this.accountService.validateResetToken( this.token )
+      .subscribe({
+        next: () => {
+          this.validating = false;
+          this.validToken = true;
+        },
+        error: error => {
+          this.validating = false;
+          this.validToken = false;
+
+          this.errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            error ||
+            'Reset link is invalid or expired.';
+        }
+      });
   }
 
   get f() {
@@ -64,29 +69,50 @@ export class ResetPasswordComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
+    this.errorMessage = '';
+    this.successMessage = '';
     this.alertService.clear();
 
     if (this.form.invalid) {
       return;
     }
 
+    if (this.f['password'].value !== this.f['confirmPassword'].value) {
+      this.errorMessage = 'Passwords do not match.';
+      return;
+    }
+
     this.loading = true;
 
-    this.accountService.resetPassword(
-      this.token,
-      this.f['password'].value,
-      this.f['confirmPassword'].value
-    ).subscribe({
-      next: () => {
-        this.alertService.success('Password reset successful. Please log in with your new password.', {
-          keepAfterRouteChange: true
-        });
-        this.router.navigate(['/account/login']);
-      },
-      error: error => {
-        this.alertService.error(error);
-        this.loading = false;
-      }
-    });
+    this.accountService.resetPassword({
+      token: this.token,
+      password: this.f['password'].value,
+      confirmPassword: this.f['confirmPassword'].value
+    })
+      .subscribe({
+        next: () => {
+          this.loading = false;
+
+          this.alertService.success(
+            'Password changed successfully. You are now logged in.',
+            { keepAfterRouteChange: true }
+          );
+
+          this.router.navigate(['/profile']);
+        },
+        error: error => {
+          this.errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            error ||
+            'Password reset failed.';
+
+          this.alertService.error(this.errorMessage);
+          this.loading = false;
+        },
+        complete: () => {
+          this.loading = false;
+        }
+      });
   }
 }

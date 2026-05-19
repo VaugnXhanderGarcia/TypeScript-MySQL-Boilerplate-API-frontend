@@ -82,16 +82,20 @@ export class AccountService {
     return this.http.post(`${this.baseUrl}/forgot-password`, { email });
   }
 
-  validateResetToken(token: string) {
-    return this.http.post(`${this.baseUrl}/validate-reset-token`, { token });
-  }
+ validateResetToken(token: string) {
+  return this.http.post<any>(`${this.baseUrl}/validate-reset-token`, { token });
+}
 
-  resetPassword(token: string, password: string, confirmPassword: string) {
-  return this.http.post(`${this.baseUrl}/reset-password`, {
-    token,
-    password,
-    confirmPassword
-  });
+resetPassword(params: any) {
+  return this.http.post<any>(`${this.baseUrl}/reset-password`, params, { withCredentials: true })
+    .pipe(map(account => {
+      if (account && account.jwtToken) {
+        localStorage.setItem('account', JSON.stringify(account));
+        this.accountSubject.next(account);
+      }
+
+      return account;
+    }));
 }
 
   getAll() {
