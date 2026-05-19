@@ -9,17 +9,17 @@
           Verifying your email...
         </div>
 
-        <div *ngIf="successMessage" class="alert alert-success">
+        <div *ngIf="!verifying && successMessage" class="alert alert-success">
           {{ successMessage }}
         </div>
 
-        <div *ngIf="errorMessage" class="alert alert-danger">
+        <div *ngIf="!verifying && errorMessage" class="alert alert-danger">
           {{ errorMessage }}
         </div>
 
-        <a routerLink="../login" class="btn btn-primary mt-2">
-          Go to Login
-        </a>
+        <p *ngIf="!verifying" class="text-muted mb-0">
+          Please wait...
+        </p>
       </div>
     </div>
   </div>

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { first, finalize } from 'rxjs/operators';
 
-import { AccountService } from '../_services';
+import { AccountService, AlertService } from '../_services';
 
 @Component({
   selector: 'app-verify-email',
@@ -15,7 +16,9 @@ export class VerifyEmailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private accountService: AccountService
+    private router: Router,
+    private accountService: AccountService,
+    private alertService: AlertService
   ) {}
 
   ngOnInit() {
@@ -23,25 +26,51 @@ export class VerifyEmailComponent implements OnInit {
 
     if (!token) {
       this.verifying = false;
-      this.errorMessage = 'Verification token is missing.';
+      this.errorMessage = 'Verification token is missing. Redirecting to login...';
+
+      setTimeout(() => {
+        this.router.navigate(['/account/login']);
+      }, 2000);
+
       return;
     }
 
     this.accountService.verifyEmail(token)
+      .pipe(
+        first(),
+        finalize(() => {
+          this.verifying = false;
+        })
+      )
       .subscribe({
         next: (response: any) => {
-          this.verifying = false;
           this.successMessage =
             response?.message ||
-            'Email verified successfully. You can now log in.';
+            'Email verified successfully. Redirecting to login...';
+
+          this.alertService.success(
+            'Email verified successfully. You can now log in.',
+            { keepAfterRouteChange: true }
+          );
+
+          setTimeout(() => {
+            this.router.navigate(['/account/login']);
+          }, 1500);
         },
         error: error => {
-          this.verifying = false;
           this.errorMessage =
             error?.error?.message ||
             error?.message ||
             error ||
-            'Email verification failed.';
+            'Email verification failed. Redirecting to login...';
+
+          this.alertService.error(this.errorMessage, {
+            keepAfterRouteChange: true
+          });
+
+          setTimeout(() => {
+            this.router.navigate(['/account/login']);
+          }, 2500);
         }
       });
   }
