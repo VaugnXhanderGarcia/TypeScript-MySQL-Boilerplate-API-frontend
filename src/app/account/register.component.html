@@ -1,14 +1,62 @@
 <div class="row justify-content-center">
-  <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+  <div class="col-12 col-sm-10 col-md-7 col-lg-5">
     <div class="card shadow-sm">
       <div class="card-body p-4">
-        <h3 class="card-title mb-4 text-center">Login</h3>
+        <h3 class="card-title mb-4 text-center">Register</h3>
 
         <div *ngIf="errorMessage" class="alert alert-danger">
           {{ errorMessage }}
         </div>
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Title</label>
+              <select
+                formControlName="title"
+                class="form-select"
+                [ngClass]="{ 'is-invalid': submitted && f['title'].errors }">
+                <option *ngFor="let title of titles" [value]="title">
+                  {{ title }}
+                </option>
+              </select>
+
+              <div *ngIf="submitted && f['title'].errors" class="invalid-feedback">
+                Title is required
+              </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">First Name</label>
+              <input
+                type="text"
+                formControlName="firstName"
+                class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f['firstName'].errors }"
+                placeholder="First name"
+              />
+
+              <div *ngIf="submitted && f['firstName'].errors" class="invalid-feedback">
+                First name is required
+              </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Last Name</label>
+              <input
+                type="text"
+                formControlName="lastName"
+                class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f['lastName'].errors }"
+                placeholder="Last name"
+              />
+
+              <div *ngIf="submitted && f['lastName'].errors" class="invalid-feedback">
+                Last name is required
+              </div>
+            </div>
+          </div>
+
           <div class="mb-3">
             <label class="form-label">Email</label>
             <input
@@ -16,7 +64,7 @@
               formControlName="email"
               class="form-control"
               [ngClass]="{ 'is-invalid': submitted && f['email'].errors }"
-              placeholder="Enter your email"
+              placeholder="Enter email"
             />
 
             <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
@@ -25,18 +73,61 @@
             </div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Password</label>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Password</label>
+              <input
+                type="password"
+                formControlName="password"
+                class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f['password'].errors }"
+                placeholder="Password"
+              />
+
+              <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+                <div *ngIf="f['password'].errors['required']">Password is required</div>
+                <div *ngIf="f['password'].errors['minlength']">
+                  Password must be at least 6 characters
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Confirm Password</label>
+              <input
+                type="password"
+                formControlName="confirmPassword"
+                class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f['confirmPassword'].errors }"
+                placeholder="Confirm password"
+              />
+
+              <div *ngIf="submitted && f['confirmPassword'].errors" class="invalid-feedback">
+                <div *ngIf="f['confirmPassword'].errors['required']">
+                  Confirm password is required
+                </div>
+                <div *ngIf="f['confirmPassword'].errors['mustMatch']">
+                  Passwords must match
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-check mb-3">
             <input
-              type="password"
-              formControlName="password"
-              class="form-control"
-              [ngClass]="{ 'is-invalid': submitted && f['password'].errors }"
-              placeholder="Enter your password"
+              type="checkbox"
+              formControlName="acceptTerms"
+              id="acceptTerms"
+              class="form-check-input"
+              [ngClass]="{ 'is-invalid': submitted && f['acceptTerms'].errors }"
             />
 
-            <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
-              <div *ngIf="f['password'].errors['required']">Password is required</div>
+            <label for="acceptTerms" class="form-check-label">
+              Accept Terms and Conditions
+            </label>
+
+            <div *ngIf="submitted && f['acceptTerms'].errors" class="invalid-feedback d-block">
+              You must accept the terms and conditions
             </div>
           </div>
 
@@ -46,13 +137,12 @@
                 *ngIf="loading"
                 class="spinner-border spinner-border-sm me-1">
               </span>
-              {{ loading ? 'Logging in...' : 'Login' }}
+              {{ loading ? 'Registering...' : 'Register' }}
             </button>
           </div>
 
-          <div class="d-flex justify-content-between">
-            <a routerLink="../register">Register</a>
-            <a routerLink="../forgot-password">Forgot Password?</a>
+          <div class="text-center">
+            <a routerLink="/account/login">Back to Login</a>
           </div>
         </form>
       </div>

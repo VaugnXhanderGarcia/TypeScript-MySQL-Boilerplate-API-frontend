@@ -1,26 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  AbstractControl,
-  ValidationErrors,
-  ValidatorFn
-} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { first, finalize } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
 @Component({
   selector: 'app-register',
-  templateUrl: './register.component.html',
-  standalone: false
+  standalone: false,
+  templateUrl: './register.component.html'
 })
 export class RegisterComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
   errorMessage = '';
+  successMessage = '';
+
+  titles = ['Mr', 'Mrs', 'Miss', 'Ms'];
 
   constructor(
     private formBuilder: FormBuilder,
@@ -32,7 +29,7 @@ export class RegisterComponent implements OnInit {
   ngOnInit() {
     this.form = this.formBuilder.group(
       {
-        title: ['', Validators.required],
+        title: ['Mr', Validators.required],
         firstName: ['', Validators.required],
         lastName: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
@@ -51,62 +48,65 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
-  this.submitted = true;
-  this.errorMessage = '';
-  this.alertService.clear();
+    this.submitted = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.alertService.clear();
 
-  if (this.form.invalid) {
-    return;
+    if (this.form.invalid) {
+      return;
+    }
+
+    this.loading = true;
+
+    this.accountService.register(this.form.value)
+      .pipe(
+        first(),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: (response: any) => {
+          this.alertService.success(
+            response?.message || 'Registration successful. Please check your email for verification.',
+            { keepAfterRouteChange: true }
+          );
+
+          this.form.reset();
+          this.submitted = false;
+
+          this.router.navigate(['/account/login']);
+        },
+        error: error => {
+          this.errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            error ||
+            'Registration failed. Please try again.';
+
+          this.alertService.error(this.errorMessage);
+        }
+      });
   }
 
-  this.loading = true;
+  private mustMatch(password: string, confirmPassword: string) {
+    return (formGroup: AbstractControl) => {
+      const passwordControl = formGroup.get(password);
+      const confirmPasswordControl = formGroup.get(confirmPassword);
 
-  this.accountService.register(this.form.value)
-    .subscribe({
-      next: () => {
-        this.loading = false;
-
-        this.alertService.success(
-          'Registration successful, please check your email for verification instructions',
-          { keepAfterRouteChange: true }
-        );
-
-        this.router.navigate(['/account/login']);
-      },
-      error: error => {
-        const message =
-          error?.error?.message ||
-          error?.message ||
-          error ||
-          'Registration failed';
-
-        this.errorMessage = message;
-        this.alertService.error(message);
-        this.loading = false;
-      },
-      complete: () => {
-        this.loading = false;
-      }
-    });
-}
-
-  private mustMatch(controlName: string, matchingControlName: string): ValidatorFn {
-    return (formGroup: AbstractControl): ValidationErrors | null => {
-      const control = formGroup.get(controlName);
-      const matchingControl = formGroup.get(matchingControlName);
-
-      if (!control || !matchingControl) {
+      if (!passwordControl || !confirmPasswordControl) {
         return null;
       }
 
-      if (matchingControl.errors && !matchingControl.errors['mustMatch']) {
+      if (confirmPasswordControl.errors && !confirmPasswordControl.errors['mustMatch']) {
         return null;
       }
 
-      if (control.value !== matchingControl.value) {
-        matchingControl.setErrors({ mustMatch: true });
+      if (passwordControl.value !== confirmPasswordControl.value) {
+        confirmPasswordControl.setErrors({ mustMatch: true });
       } else {
-        matchingControl.setErrors(null);
+        confirmPasswordControl.setErrors(null);
       }
 
       return null;
