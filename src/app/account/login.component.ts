@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { first, finalize } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
 @Component({
-  selector: 'app-login',
   standalone: false,
   templateUrl: './login.component.html'
 })
@@ -13,6 +13,7 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
+  returnUrl = '';
   errorMessage = '';
 
   constructor(
@@ -32,6 +33,8 @@ export class LoginComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/profile';
   }
 
   get f() {
@@ -40,7 +43,6 @@ export class LoginComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-    this.loading = false;
     this.errorMessage = '';
     this.alertService.clear();
 
@@ -50,28 +52,26 @@ export class LoginComponent implements OnInit {
 
     this.loading = true;
 
-    this.accountService.login(
-      this.f['email'].value,
-      this.f['password'].value
-    ).subscribe({
-      next: () => {
-        this.loading = false;
-        this.router.navigate(['/profile']);
-      },
-      error: error => {
-  const message =
-    error?.error?.message ||
-    error?.message ||
-    error ||
-    'Login failed';
+    this.accountService.login(this.f['email'].value, this.f['password'].value)
+      .pipe(
+        first(),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.router.navigate([this.returnUrl]);
+        },
+        error: error => {
+          this.errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            error ||
+            'Email or password is incorrect';
 
-  this.errorMessage = message;
-  this.alertService.error(message);
-  this.loading = false;
-},
-complete: () => {
-  this.loading = false;
-}
-    });
+          this.alertService.error(this.errorMessage);
+        }
+      });
   }
 }
