@@ -87,16 +87,16 @@ export class AccountService {
   }
 
   resetPassword(params: any) {
-    return this.http
-      .post<Account>(`${this.baseUrl}/reset-password`, params, { withCredentials: true })
-      .pipe(
-        map((account: Account) => {
-          this.accountSubject.next(account);
-          this.startRefreshTokenTimer();
-          return account;
-        })
-      );
-  }
+  return this.http
+    .post<Account>(`${this.baseUrl}/reset-password`, params, { withCredentials: true })
+    .pipe(
+      map((account: Account) => {
+        this.accountSubject.next(account);
+        this.startRefreshTokenTimer();
+        return account;
+      })
+    );
+}
 
   getAll() {
     return this.http.get<Account[]>(this.baseUrl);

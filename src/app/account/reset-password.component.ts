@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first, finalize } from 'rxjs/operators';
+import { first, finalize, timeout } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
@@ -14,7 +14,7 @@ export class ResetPasswordComponent implements OnInit {
   form!: FormGroup;
   token = '';
 
-  validating = true;
+  validating = false;
   validToken = false;
   submitted = false;
   loading = false;
@@ -39,30 +39,14 @@ export class ResetPasswordComponent implements OnInit {
     });
 
     if (!this.token) {
-      this.validating = false;
       this.validToken = false;
       this.errorMessage = 'Reset token is missing.';
       return;
     }
 
-    this.accountService.validateResetToken(this.token)
-      .pipe(
-        first(),
-        finalize(() => this.validating = false)
-      )
-      .subscribe({
-        next: () => {
-          this.validToken = true;
-        },
-        error: error => {
-          this.validToken = false;
-          this.errorMessage =
-            error?.error?.message ||
-            error?.message ||
-            error ||
-            'Reset link is invalid or expired.';
-        }
-      });
+    // Do not wait forever on validate-reset-token.
+    // The backend will still validate the token during reset-password submit.
+    this.validToken = true;
   }
 
   get f() {
@@ -93,7 +77,10 @@ export class ResetPasswordComponent implements OnInit {
     })
       .pipe(
         first(),
-        finalize(() => this.loading = false)
+        timeout(20000),
+        finalize(() => {
+          this.loading = false;
+        })
       )
       .subscribe({
         next: () => {
@@ -109,7 +96,7 @@ export class ResetPasswordComponent implements OnInit {
             error?.error?.message ||
             error?.message ||
             error ||
-            'Password reset failed.';
+            'Password reset failed. The link may be invalid or expired.';
 
           this.alertService.error(this.errorMessage);
         }

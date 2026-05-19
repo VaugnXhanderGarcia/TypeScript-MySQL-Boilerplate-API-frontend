@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first, finalize } from 'rxjs/operators';
+import { first, finalize, timeout } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
@@ -36,7 +36,6 @@ export class ForgotPasswordComponent implements OnInit {
     this.submitted = true;
     this.successMessage = '';
     this.errorMessage = '';
-
     this.alertService.clear();
 
     if (this.form.invalid) {
@@ -48,13 +47,16 @@ export class ForgotPasswordComponent implements OnInit {
     this.accountService.forgotPassword(this.f['email'].value)
       .pipe(
         first(),
-        finalize(() => this.loading = false)
+        timeout(20000),
+        finalize(() => {
+          this.loading = false;
+        })
       )
       .subscribe({
         next: (response: any) => {
           this.successMessage =
             response?.message ||
-            'Please check your email for password reset instructions.';
+            'Password reset email sent. Please check your email account.';
 
           this.alertService.success(this.successMessage);
         },
@@ -63,7 +65,7 @@ export class ForgotPasswordComponent implements OnInit {
             error?.error?.message ||
             error?.message ||
             error ||
-            'Failed to send password reset email.';
+            'Unable to send password reset email. Please try again.';
 
           this.alertService.error(this.errorMessage);
         }
