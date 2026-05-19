@@ -82,21 +82,21 @@ export class AccountService {
     return this.http.post(`${this.baseUrl}/forgot-password`, { email });
   }
 
- validateResetToken(token: string) {
-  return this.http.post<any>(`${this.baseUrl}/validate-reset-token`, { token });
-}
+  validateResetToken(token: string) {
+    return this.http.post<any>(`${this.baseUrl}/validate-reset-token`, { token });
+  }
 
-resetPassword(params: any) {
-  return this.http.post<any>(`${this.baseUrl}/reset-password`, params, { withCredentials: true })
-    .pipe(map(account => {
-      if (account && account.jwtToken) {
-        localStorage.setItem('account', JSON.stringify(account));
-        this.accountSubject.next(account);
-      }
-
-      return account;
-    }));
-}
+  resetPassword(params: any) {
+    return this.http
+      .post<Account>(`${this.baseUrl}/reset-password`, params, { withCredentials: true })
+      .pipe(
+        map((account: Account) => {
+          this.accountSubject.next(account);
+          this.startRefreshTokenTimer();
+          return account;
+        })
+      );
+  }
 
   getAll() {
     return this.http.get<Account[]>(this.baseUrl);
@@ -150,13 +150,13 @@ resetPassword(params: any) {
     const expires = new Date(jwtToken.exp * 1000);
     const timeout = expires.getTime() - Date.now() - 60 * 1000;
 
-if (timeout <= 0) {
-  return;
-}
+    if (timeout <= 0) {
+      return;
+    }
 
-this.refreshTokenTimeout = setTimeout(() => {
-  this.refreshToken().subscribe({ error: () => this.logout() });
-}, timeout);
+    this.refreshTokenTimeout = setTimeout(() => {
+      this.refreshToken().subscribe({ error: () => this.logout() });
+    }, timeout);
   }
 
   private stopRefreshTokenTimer() {
