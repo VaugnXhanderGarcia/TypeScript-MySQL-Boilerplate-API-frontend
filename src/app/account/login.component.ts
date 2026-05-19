@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { first, finalize } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
 @Component({
+  selector: 'app-login',
   standalone: false,
   templateUrl: './login.component.html'
 })
@@ -13,8 +14,8 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
-  returnUrl = '';
   errorMessage = '';
+  returnUrl = '/profile';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -24,7 +25,7 @@ export class LoginComponent implements OnInit {
     private alertService: AlertService
   ) {
     if (this.accountService.accountValue) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/profile']);
     }
   }
 
@@ -52,7 +53,10 @@ export class LoginComponent implements OnInit {
 
     this.loading = true;
 
-    this.accountService.login(this.f['email'].value, this.f['password'].value)
+    this.accountService.login(
+      this.f['email'].value,
+      this.f['password'].value
+    )
       .pipe(
         first(),
         finalize(() => {
@@ -63,14 +67,9 @@ export class LoginComponent implements OnInit {
         next: () => {
           this.router.navigate([this.returnUrl]);
         },
-        error: error => {
-          this.errorMessage =
-            error?.error?.message ||
-            error?.message ||
-            error ||
-            'Email or password is incorrect';
-
-          this.alertService.error(this.errorMessage);
+        error: () => {
+          this.errorMessage = 'Invalid username or password';
+          this.alertService.error('Invalid username or password');
         }
       });
   }
