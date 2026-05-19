@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first, finalize, timeout } from 'rxjs/operators';
+import { first, finalize } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
@@ -17,6 +18,7 @@ export class ForgotPasswordComponent implements OnInit {
   errorMessage = '';
 
   constructor(
+    private router: Router,
     private formBuilder: FormBuilder,
     private accountService: AccountService,
     private alertService: AlertService
@@ -47,25 +49,25 @@ export class ForgotPasswordComponent implements OnInit {
     this.accountService.forgotPassword(this.f['email'].value)
       .pipe(
         first(),
-        timeout(20000),
         finalize(() => {
           this.loading = false;
         })
       )
       .subscribe({
-        next: (response: any) => {
-          this.successMessage =
-            response?.message ||
-            'Password reset email sent. Please check your email account.';
+        next: () => {
+          this.alertService.success(
+            'Password reset email sent. Please check your email account.',
+            { keepAfterRouteChange: true }
+          );
 
-          this.alertService.success(this.successMessage);
+          this.router.navigate(['/account/login']);
         },
         error: error => {
           this.errorMessage =
             error?.error?.message ||
             error?.message ||
             error ||
-            'Unable to send password reset email. Please try again.';
+            'Unable to send reset password email. Please try again.';
 
           this.alertService.error(this.errorMessage);
         }
