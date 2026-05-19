@@ -1,16 +1,21 @@
+<div
+  *ngIf="showFloatingError"
+  class="alert alert-danger shadow position-fixed top-0 start-50 translate-middle-x mt-4"
+  style="z-index: 9999; min-width: 320px; text-align: center;"
+>
+  {{ errorMessage }}
+</div>
+
 <div class="row justify-content-center">
   <div class="col-12 col-sm-10 col-md-6 col-lg-4">
     <div class="card shadow-sm">
       <div class="card-body p-4">
         <h3 class="card-title mb-4 text-center">Login</h3>
 
-        <div *ngIf="errorMessage" class="alert alert-danger">
-          {{ errorMessage }}
-        </div>
-
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           <div class="mb-3">
             <label class="form-label">Email</label>
+
             <input
               type="email"
               formControlName="email"
@@ -27,6 +32,7 @@
 
           <div class="mb-3">
             <label class="form-label">Password</label>
+
             <input
               type="password"
               formControlName="password"

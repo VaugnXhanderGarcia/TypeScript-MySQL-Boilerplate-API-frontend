@@ -14,7 +14,10 @@ export class LoginComponent implements OnInit {
   loading = false;
   submitted = false;
   errorMessage = '';
+  showFloatingError = false;
   returnUrl = '/profile';
+
+  private errorTimer: any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -40,6 +43,7 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
     this.errorMessage = '';
+    this.showFloatingError = false;
     this.alertService.clear();
 
     if (this.form.invalid) {
@@ -58,12 +62,18 @@ export class LoginComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
+        this.submitted = false;
+
         this.errorMessage = 'Invalid username or password';
+        this.showFloatingError = true;
 
-        this.alertService.error('Invalid username or password');
+        this.form.reset();
 
-        // guaranteed visible popup
-        window.alert('Invalid username or password');
+        clearTimeout(this.errorTimer);
+        this.errorTimer = setTimeout(() => {
+          this.showFloatingError = false;
+          this.errorMessage = '';
+        }, 3500);
       }
     });
   }
