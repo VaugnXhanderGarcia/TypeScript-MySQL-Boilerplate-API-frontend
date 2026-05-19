@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { first, finalize } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '../_services';
 
@@ -23,11 +22,7 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private accountService: AccountService,
     private alertService: AlertService
-  ) {
-    if (this.accountService.accountValue) {
-      this.router.navigate(['/profile']);
-    }
-  }
+  ) {}
 
   ngOnInit() {
     this.form = this.formBuilder.group({
@@ -56,21 +51,20 @@ export class LoginComponent implements OnInit {
     this.accountService.login(
       this.f['email'].value,
       this.f['password'].value
-    )
-      .pipe(
-        first(),
-        finalize(() => {
-          this.loading = false;
-        })
-      )
-      .subscribe({
-        next: () => {
-          this.router.navigate([this.returnUrl]);
-        },
-        error: () => {
-          this.errorMessage = 'Invalid username or password';
-          this.alertService.error('Invalid username or password');
-        }
-      });
+    ).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate([this.returnUrl]);
+      },
+      error: () => {
+        this.loading = false;
+        this.errorMessage = 'Invalid username or password';
+
+        this.alertService.error('Invalid username or password');
+
+        // guaranteed visible popup
+        window.alert('Invalid username or password');
+      }
+    });
   }
 }
